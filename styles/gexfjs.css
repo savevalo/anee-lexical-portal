@@ -19,12 +19,22 @@ body {
 /* EN HAUT */
 
 #titlebar {
-    background: #ffffff; border-bottom: 1px solid #CCC; position: fixed; margin: 0; padding: 0; left: 0; top: 0; right: 0; height: 45px; overflow: hidden;
+    background: url(../img/ANEE_logo.png) no-repeat, #ffffff;
+    background-position: right; background-size: 60px;
+    border-bottom: 1px solid #CCC; position: fixed; margin: 0; padding: 0; left: 0; top: 0; right: 0; height: 45px; overflow: hidden;
 }
 
 #maintitle {
     position: absolute; left: 0; top: 0; width: 250px; text-align: center;
 }
+
+#backbutton {
+    position: absolute; left: 620px; top: 12px;
+}
+
+/* #headertext { */
+/*     position: absolute; right: 0px; top: 0px; text-align: center; width: 320px; padding-right: 40px; border: none; background: none; */
+/* } */
 
 
 h1 {
@@ -62,6 +72,10 @@ h1 a {
 
 .grey {
     color: #cccccc; font-style: italic;
+}
+
+.control {
+    color: #f6a828;
 }
 
 /* AU CENTRE */
@@ -214,7 +228,11 @@ div.smallpill {
     font-size: 14px;
 }
 
-#leftcontent h3, #leftcontent h4, #leftcontent p, #leftcontent ul {
+#leftcontent h5 {
+    font-size: 10px;
+}
+
+#leftcontent h3, #leftcontent h4, #leftcontent h5, #leftcontent p, #leftcontent ul {
     margin: 5px;
 }
 

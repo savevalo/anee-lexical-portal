@@ -15,7 +15,6 @@
  * */
 
 (function() {
-
     var GexfJS = {
         lensRadius: 200,
         lensGamma: 0.5,
@@ -254,23 +253,56 @@
         return (_l[_str] ? _l[_str] : (GexfJS.i18n["en"][_str] ? GexfJS.i18n["en"][_str] : _str.replace("_", " ")));
     }
 
-    function replaceURLWithHyperlinks(text) {
+    function isURL(text) {
+	var _urlExp = /(\b(?:https?:\/\/)[-A-Z0-9]+\.[-A-Z0-9.:]+(?:\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*)?)/ig;
+	return _urlExp.test(text) || text.startsWith("index.html");
+    }
+    
+    function replaceURLWithHyperlinks(text, linktext) {
         if (GexfJS.params.replaceUrls) {
-            var _urlExp = /(\b(?:https?:\/\/)?[-A-Z0-9]+\.[-A-Z0-9.:]+(?:\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*)?)/ig,
+	    if (linktext == "egourl") {
+		linktext = "Go to this word's ego graph";
+	    } else if (linktext == "search url" || linktext == "korp url") {
+		linktext = "Search in Korp";
+	    }
+
+            var _urlExp = /(\b(?:https?:\/\/)[-A-Z0-9]+\.[-A-Z0-9.:]+(?:\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*)?)/ig,
                 _protocolExp = /^https?:\/\//i,
                 _res = text.split(_urlExp);
             return _res.map(function (_txt) {
                 if (_txt.match(_urlExp)) {
+		    _target = "_self";
+		    if (linktext == null) {
+			linktext = _txt.replace(_protocolExp, '');
+			_target = "_blank";
+		    }
                     return $('<a>').attr({
                         href: (_protocolExp.test(_txt) ? '' : 'http://') + _txt,
-                        target: "_blank"
-                    }).text(_txt.replace(_protocolExp, ''));
-                } else {
+                        target: _target
+                    }).text(linktext);
+                } else if (_txt.startsWith('index.html')) {
+		    return $('<a>').attr({
+                        href: _txt,
+                        target: "_self"
+                    }).text(linktext);
+		} else {
                     return $('<span>').text(_txt);
                 }
             });
         }
         return $("<span>").text(text);
+    }
+
+    function toggleColorFilter(color) {
+	if (GexfJS.params.colorFilter === color) {
+	    GexfJS.params.colorFilter = null;
+	} else {
+	    GexfJS.params.colorFilter = color;
+	}
+    }
+
+    function isProperNoun(label) {
+	return label.includes("_");
     }
 
     function displayNode(_nodeIndex, _recentre) {
@@ -292,6 +324,9 @@
                 .append($('<div>').addClass('largepill').css('background', _d.B))
                 .append($('<span>').text(_d.l))
                 .appendTo(_html);
+	    $('<h5>').text("Toggle filter on this colour").addClass('control')
+		.attr("id", "FilterControl")
+		.click(function() {toggleColorFilter(_d.B); }).appendTo(_html);
             $('<h4>').text(strLang("nodeAttr")).appendTo(_html);
             _ul.appendTo(_html);
             if (GexfJS.params.showId) {
@@ -302,76 +337,133 @@
             }
             for (var i = 0, l = _d.a.length; i < l; i++) {
                 var attr = _d.a[i];
+		if (attr[1] === "") {continue; }
                 var _li = $("<li>");
                 var attrkey = GexfJS.graph.attributes[attr[0]];
-                $("<b>").text(strLang(attrkey) + ": ").appendTo(_li);
-                if (attrkey === 'image') {
-                    $('<br>').appendTo(_li);
-                    $('<img>').attr("src", attr[1]).appendTo(_li).addClass("attrimg");
-                } else {
-                    _li.append(replaceURLWithHyperlinks(attr[1]));
-                }
+		if (attrkey != 'image' && strLang(attrkey) != 'freqrank' && GexfJS.params.replaceUrls && isURL(attr[1])) {
+		    _b = $("<b>")
+		    _b.append(replaceURLWithHyperlinks(attr[1], strLang(attrkey)));
+		    _b.appendTo(_li);
+		} else {
+		    var attrib_name = strLang(attrkey);
+		    if (attrib_name == 'freqrank') {
+			attrib_name = "Frequency rank";
+		    }
+                    $("<b>").text(attrib_name + ": ").appendTo(_li);
+                    if (attrkey === 'image') {
+			$('<br>').appendTo(_li);
+			$('<img>').attr("src", attr[1]).appendTo(_li).addClass("attrimg");
+		    } else if (typeof(attr[1]) === 'string' && attr[1].match(/^-?\d*\.\d+?$/) != null) {
+			_li.append(parseFloat(attr[1]).toFixed(2));
+		    } else {
+			_li.append(replaceURLWithHyperlinks(attr[1]));
+                    }
+		}
                 _li.appendTo(_ul);
             }
             var _str_in = [],
                 _str_out = [],
-                _str_undir = [];
+                _str_undir = [],
+		_str_undir_proper = [];
+	    
+	    var node_weight_id = []
+	    
             GexfJS.graph.edgeList.forEach(function (_e) {
                 if (_e.t == _nodeIndex) {
                     var _n = GexfJS.graph.nodeList[_e.s];
-                    var _li = $("<li>");
-                    $("<div>").addClass("smallpill").css("background", _n.B).appendTo(_li);
-                    $("<a>")
-                        .text(_n.l)
-                        .attr("href", "#")
-                        .mouseover(function () {
-                            GexfJS.params.activeNode = _e.s;
-                        })
-                        .click(function () {
-                            displayNode(_e.s, true);
-                            return false;
-                        })
-                        .appendTo(_li);
-                    if (GexfJS.params.showEdgeLabel) {
-                        $('<span>').text(" – " + _e.l).appendTo(_li);
-                    }
-                    if (GexfJS.params.showEdgeWeight) {
-                        $('<span>').text(" (" + _e.w + ")").appendTo(_li);
-                    }
-                    if (_e.d) {
-                        _str_in.push(_li);
-                    } else {
-                        _str_undir.push(_li);
-                    }
+	    	    node_weight_id.push([_n, parseFloat(_e.w), _e.s]);
                 }
                 if (_e.s == _nodeIndex) {
                     var _n = GexfJS.graph.nodeList[_e.t];
-                    var _li = $("<li>");
-                    $("<div>").addClass("smallpill").css("background", _n.B).appendTo(_li);
-                    $("<a>")
-                        .text(_n.l)
-                        .attr("href", "#")
-                        .mouseover(function () {
-                            GexfJS.params.activeNode = _e.t;
-                        })
-                        .click(function () {
-                            displayNode(_e.t, true);
-                            return false;
-                        })
-                        .appendTo(_li);
-                    if (GexfJS.params.showEdgeLabel) {
-                        $('<span>').text(" – " + _e.l).appendTo(_li);
-                    }
-                    if (GexfJS.params.showEdgeWeight) {
-                        $('<span>').text(" (" + _e.w + ")").appendTo(_li);
-                    }
-                    if (_e.d) {
-                        _str_out.push(_li);
-                    } else {
-                        _str_undir.push(_li);
-                    }
+	    	    node_weight_id.push([_n, parseFloat(_e.w), _e.t]);
+	    	}})
+
+	    node_weight_id.sort(function(a, b) {return b[1] - a[1]});
+
+            node_weight_id.forEach(function (n_w) {
+                var _li = $("<li>");
+                $("<div>").addClass("smallpill").css("background", n_w[0].B).appendTo(_li);
+                $("<a>")
+                    .text(n_w[0].l)
+                    .attr("href", "#")
+                    .mouseover(function () {
+                        GexfJS.params.activeNode = n_w[2];
+                    })
+                    .click(function () {
+                        displayNode(n_w[2], true);
+                        return false;
+                    })
+                    .appendTo(_li);
+                if (GexfJS.params.showEdgeWeight) {
+                    $('<span>').text(" (" + n_w[1].toFixed(2) + ")").appendTo(_li);
                 }
+		if (isProperNoun(n_w[0].l)) {
+		    _str_undir_proper.push(_li);
+		} else {
+		    _str_undir.push(_li);
+		}
+
             });
+
+	    
+		    
+            // GexfJS.graph.edgeList.forEach(function (_e) {
+            //     if (_e.t == _nodeIndex) {
+            //         var _n = GexfJS.graph.nodeList[_e.s];
+            //         var _li = $("<li>");
+            //         $("<div>").addClass("smallpill").css("background", _n.B).appendTo(_li);
+            //         $("<a>")
+            //             .text(_n.l)
+            //             .attr("href", "#")
+            //             .mouseover(function () {
+            //                 GexfJS.params.activeNode = _e.s;
+            //             })
+            //             .click(function () {
+            //                 displayNode(_e.s, true);
+            //                 return false;
+            //             })
+            //             .appendTo(_li);
+            //         if (GexfJS.params.showEdgeLabel) {
+            //             $('<span>').text(" – " + _e.l).appendTo(_li);
+            //         }
+            //         if (GexfJS.params.showEdgeWeight) {
+            //             $('<span>').text(" (" + _e.w + ")").appendTo(_li);
+            //         }
+            //         if (_e.d) {
+            //             _str_in.push(_li);
+            //         } else {
+            //             _str_undir.push(_li);
+            //         }
+            //     }
+            //     if (_e.s == _nodeIndex) {
+            //         var _n = GexfJS.graph.nodeList[_e.t];
+            //         var _li = $("<li>");
+            //         $("<div>").addClass("smallpill").css("background", _n.B).appendTo(_li);
+            //         $("<a>")
+            //             .text(_n.l)
+            //             .attr("href", "#")
+            //             .mouseover(function () {
+            //                 GexfJS.params.activeNode = _e.t;
+            //             })
+            //             .click(function () {
+            //                 displayNode(_e.t, true);
+            //                 return false;
+            //             })
+            //             .appendTo(_li);
+            //         if (GexfJS.params.showEdgeLabel) {
+            //             $('<span>').text(" – " + _e.l).appendTo(_li);
+            //         }
+            //         if (GexfJS.params.showEdgeWeight) {
+            //             $('<span>').text(" (" + _e.w + ")").appendTo(_li);
+            //         }
+            //         if (_e.d) {
+            //             _str_out.push(_li);
+            //         } else {
+            //             _str_undir.push(_li);
+            //         }
+            //     }
+            // });
+
             if (_str_in.length) {
                 $('<h4>').text(strLang("inLinks")).appendTo(_html);
                 $('<ul>').html(_str_in).appendTo(_html);
@@ -381,8 +473,12 @@
                 $('<ul>').html(_str_out).appendTo(_html);
             }
             if (_str_undir.length) {
-                $('<h4>').text(strLang("undirLinks")).appendTo(_html);
+                $('<h4>').text("Linked words:").appendTo(_html);
                 $('<ul>').html(_str_undir).appendTo(_html);
+            }
+            if (_str_undir.length) {
+                $('<h4>').text("Linked proper nouns:").appendTo(_html);
+                $('<ul>').html(_str_undir_proper).appendTo(_html);
             }
             $("#leftcontent").html(_html);
             if (_recentre) {
@@ -643,6 +739,7 @@
         GexfJS.timeRefresh = setInterval(traceMap, 60);
         GexfJS.graph = null;
         loadGraph();
+
     }
 
     function loadGraph() {
@@ -651,7 +748,6 @@
         var isJson = (function (t) { return t[t.length - 1]; })(url.split('.')) === 'json';
 
         console.log("Loading " + url + " in " + (isJson ? "json" : "gexf") + " mode");
-        measureTime("Loading graph from network");
 
         $.ajax({
             url: url,
@@ -660,11 +756,39 @@
                 measureTime("Loading graph from network");
                 measureTime("Pre-processing graph");
                 if (isJson) {
-                    GexfJS.graph = data;
+		    GexfJS.graph = data;
+		    if (!GexfJS.graph.hasOwnProperty("name")) { GexfJS.graph.name = url; }
+		    document.getElementsByName("graphname")[0].innerHTML = GexfJS.graph.name;
+		    if (GexfJS.graph.name.includes("PMI")) {
+			document.getElementById("mainPageLink").setAttribute("href", "http://urn.fi/urn:nbn:fi:lb-2021060102");
+		    } else if (GexfJS.graph.name.includes("fastText")) {
+			document.getElementById("mainPageLink").setAttribute("href", "http://urn.fi/urn:nbn:fi:lb-2021060104");
+		    }
                     GexfJS.graph.indexOfLabels = GexfJS.graph.nodeList.map(function (_d) {
-                        return _d.l.toLowerCase();
+                        return normalizeText.normalizeText(_d.l);
                     });
-
+		    var translation_attr_index = GexfJS.graph.attributes.indexOf("translation");
+		    if (translation_attr_index >= 0) {
+			console.log("Found translation attribute");
+			GexfJS.graph.indexOfTranslations = [];
+			GexfJS.graph.nodeList.forEach(function (_n) {
+			    _n.translation = _n["a"][translation_attr_index][1].replace(/;+$/g, '');
+			    GexfJS.graph.indexOfTranslations.push(normalizeText.normalizeText(_n.translation));
+			});
+		    }
+		    var egourl_attr_index = GexfJS.graph.attributes.indexOf("egourl");
+		    if (egourl_attr_index >= 0) {
+			console.log("Found egourl attribute");
+			for (let i = 0; i < GexfJS.graph.nodeList.length; ++i) {
+			    if (GexfJS.graph.nodeList[i]["a"].length <= egourl_attr_index || GexfJS.graph.nodeList[i]["a"][egourl_attr_index][0] != egourl_attr_index || GexfJS.graph.nodeList[i]["a"][egourl_attr_index][1] == "") {
+				console.log("Found egourl root");
+				GexfJS.graph.root_node = i;
+				//GexfJS.params.activeNode = i;
+				//GexfJS.params.currentNode = i;
+				break;
+			    }
+			}
+		    }
                 } else {
                     var _g = $(data).find("graph"),
                         _nodes = _g.children().filter("nodes").children(),
@@ -730,7 +854,8 @@
                         }
                         GexfJS.graph.nodeList.push(_d);
                         nodeIndexById.push(_d.id);
-                        GexfJS.graph.indexOfLabels.push(_d.l.toLowerCase());
+                        GexfJS.graph.indexOfLabels.push(normalizeText.normalizeText(_d.l));
+			// GexfJS.graph.indexOfTranslations.push(normalizeText.normalizeText(_d.translation));
                     });
 
                     $(_edges).each(function () {
@@ -789,9 +914,14 @@
                 });
 
                 GexfJS.imageMini = GexfJS.ctxMini.getImageData(0, 0, GexfJS.overviewWidth, GexfJS.overviewHeight);
-                
+
+		if ("root_node" in GexfJS.graph) {
+		    console.log("displaying root node " + GexfJS.graph.root_node);
+		    displayNode(GexfJS.graph.root_node, true);
+		}
             }
         });
+	GexfJS.params.zoomLevel = 0;
     }
 
     function getNodeFromPos(_coords) {
@@ -940,6 +1070,7 @@
 
         var _centralNode = ((GexfJS.params.activeNode != -1) ? GexfJS.params.activeNode : GexfJS.params.currentNode);
 
+	var min_node_radius = 1000.0;
         for (var i in GexfJS.graph.nodeList) {
             var _d = GexfJS.graph.nodeList[i];
             _d.actual_coords = {
@@ -948,9 +1079,12 @@
                 r: _nodeSizeFactor * _d.r
             };
             _d.withinFrame = ((_d.actual_coords.x + _d.actual_coords.r > 0) && (_d.actual_coords.x - _d.actual_coords.r < GexfJS.graphZone.width) && (_d.actual_coords.y + _d.actual_coords.r > 0) && (_d.actual_coords.y - _d.actual_coords.r < GexfJS.graphZone.height));
-            _d.visible = (GexfJS.params.currentNode == -1 || i == _centralNode || GexfJS.params.showEdges);
+	    if (_d.withinFrame) {
+		min_node_radius = Math.min(min_node_radius, _d.actual_coords.r);
+	    }
+            _d.visible = (GexfJS.params.currentNode == -1 || i == _centralNode);
+	    _d.filtered = (GexfJS.params.colorFilter != null && _d.B !== GexfJS.params.colorFilter)
         }
-
         var _tagsMisEnValeur = [];
 
         if (_centralNode != -1) {
@@ -958,7 +1092,7 @@
         }
 
         if (!GexfJS.params.isMoving && (GexfJS.params.showEdges || _centralNode != -1)) {
-
+	    var maxLineWidth = 0.001;
             var _showAllEdges = (GexfJS.params.showEdges && GexfJS.params.currentNode == -1);
 
             for (var i in GexfJS.graph.edgeList) {
@@ -984,27 +1118,67 @@
                 }
 
                 if ((_isLinked || _showAllEdges) && (_ds.withinFrame || _dt.withinFrame) && _ds.visible && _dt.visible) {
-                    GexfJS.ctxGraphe.lineWidth = _edgeSizeFactor * _d.W;
                     var _coords = ((GexfJS.params.useLens && GexfJS.mousePosition) ? calcCoord(GexfJS.mousePosition.x, GexfJS.mousePosition.y, _ds.actual_coords) : _ds.actual_coords);
                     _coordt = ((GexfJS.params.useLens && GexfJS.mousePosition) ? calcCoord(GexfJS.mousePosition.x, GexfJS.mousePosition.y, _dt.actual_coords) : _dt.actual_coords);
+		    var _dist = Math.sqrt(Math.pow(_coords.x - _coordt.x, 2) + Math.pow(_coords.y - _coordt.y, 2));
+		    maxLineWidth = Math.max(maxLineWidth, _edgeSizeFactor * _d.W);
+                }
+            }
+	    
+            for (var i in GexfJS.graph.edgeList) {
+                var _d = GexfJS.graph.edgeList[i],
+                    _six = _d.s,
+                    _tix = _d.t,
+                    _ds = GexfJS.graph.nodeList[_six],
+                    _dt = GexfJS.graph.nodeList[_tix];
+                var _isLinked = false;
+                if (_centralNode != -1) {
+                    if (_six == _centralNode) {
+                        _tagsMisEnValeur.push(_tix);
+                        _coulTag = _dt.B;
+                        _isLinked = true;
+                        _dt.visible = true;
+                    }
+                    if (_tix == _centralNode) {
+                        _tagsMisEnValeur.push(_six);
+                        _coulTag = _ds.B;
+                        _isLinked = true;
+                        _ds.visible = true;
+                    }
+                }
+
+                if ((_isLinked || _showAllEdges) && (_ds.withinFrame || _dt.withinFrame) && _ds.visible && _dt.visible && (!_ds.filtered && !_dt.filtered)) {
+                    var _coords = ((GexfJS.params.useLens && GexfJS.mousePosition) ? calcCoord(GexfJS.mousePosition.x, GexfJS.mousePosition.y, _ds.actual_coords) : _ds.actual_coords);
+                    _coordt = ((GexfJS.params.useLens && GexfJS.mousePosition) ? calcCoord(GexfJS.mousePosition.x, GexfJS.mousePosition.y, _dt.actual_coords) : _dt.actual_coords);
+		    var _dist = Math.sqrt(Math.pow(_coords.x - _coordt.x, 2) + Math.pow(_coords.y - _coordt.y, 2));
                     GexfJS.ctxGraphe.strokeStyle = (_isLinked ? _d.C : "rgba(100,100,100,0.2)");
+		    if (maxLineWidth <= 30.0) {
+			GexfJS.ctxGraphe.lineWidth = Math.min(maxLineWidth, min_node_radius*.8, _dist*.5, _edgeSizeFactor * _d.W);
+		    } else {
+			GexfJS.ctxGraphe.lineWidth = 30*((min_node_radius*.8, _dist*.5, _edgeSizeFactor * _d.W)/maxLineWidth);
+		    }
                     traceArc(GexfJS.ctxGraphe, _coords, _coordt, _sizeFactor * 3.5, GexfJS.params.showEdgeArrow && _d.d);
                 }
             }
-
         }
 
         GexfJS.ctxGraphe.lineWidth = 4;
         GexfJS.ctxGraphe.strokeStyle = "rgba(0,100,0,0.8)";
 
+	if (_centralNode == -1 && typeof GexfJS.graph.root_node !== "undefined") {
+	    _centralNode = GexfJS.graph.root_node;
+	}
         if (_centralNode != -1) {
+	    GexfJS.graph.root_node = i;
             var _dnc = GexfJS.graph.nodeList[_centralNode];
-            _dnc.real_coords = ((GexfJS.params.useLens && GexfJS.mousePosition) ? calcCoord(GexfJS.mousePosition.x, GexfJS.mousePosition.y, _dnc.actual_coords) : _dnc.actual_coords);
+	    if (_dnc) {
+		_dnc.real_coords = ((GexfJS.params.useLens && GexfJS.mousePosition) ? calcCoord(GexfJS.mousePosition.x, GexfJS.mousePosition.y, _dnc.actual_coords) : _dnc.actual_coords);
+	    }
         }
 
         for (var i in GexfJS.graph.nodeList) {
             var _d = GexfJS.graph.nodeList[i];
-            if (_d.visible && _d.withinFrame) {
+            if (_d.visible && _d.withinFrame && !_d.filtered) {
                 if (i != _centralNode) {
                     _d.real_coords = ((GexfJS.params.useLens && GexfJS.mousePosition) ? calcCoord(GexfJS.mousePosition.x, GexfJS.mousePosition.y, _d.actual_coords) : _d.actual_coords);
                     _d.isTag = (_tagsMisEnValeur.indexOf(parseInt(i)) != -1);
@@ -1019,7 +1193,7 @@
 
         for (var i in GexfJS.graph.nodeList) {
             var _d = GexfJS.graph.nodeList[i];
-            if (_d.visible && _d.withinFrame) {
+            if (_d.visible && _d.withinFrame && !_d.filtered) {
                 if (i != _centralNode) {
                     var _fs = _d.real_coords.r * _textSizeFactor;
                     if (_d.isTag) {
@@ -1043,7 +1217,7 @@
             }
         }
 
-        if (_centralNode != -1) {
+        if (_centralNode != -1 && _dnc) {
             GexfJS.ctxGraphe.fillStyle = _dnc.B;
             GexfJS.ctxGraphe.beginPath();
             GexfJS.ctxGraphe.arc(_dnc.real_coords.x, _dnc.real_coords.y, _dnc.real_coords.r, 0, Math.PI * 2, true);
@@ -1055,12 +1229,16 @@
             GexfJS.ctxGraphe.textAlign = "center";
             GexfJS.ctxGraphe.textBaseline = "middle";
             GexfJS.ctxGraphe.fillStyle = "rgba(255,255,250,0.8)";
-            GexfJS.ctxGraphe.fillText(_dnc.l, _dnc.real_coords.x - 2, _dnc.real_coords.y);
-            GexfJS.ctxGraphe.fillText(_dnc.l, _dnc.real_coords.x + 2, _dnc.real_coords.y);
-            GexfJS.ctxGraphe.fillText(_dnc.l, _dnc.real_coords.x, _dnc.real_coords.y - 2);
-            GexfJS.ctxGraphe.fillText(_dnc.l, _dnc.real_coords.x, _dnc.real_coords.y + 2);
+	    var display_text = _dnc.l;
+	    if (display_text !== _dnc.translation) {
+		display_text += " (" + _dnc.translation + ")";
+	    }
+            GexfJS.ctxGraphe.fillText(display_text, _dnc.real_coords.x - 2, _dnc.real_coords.y);
+            GexfJS.ctxGraphe.fillText(display_text, _dnc.real_coords.x + 2, _dnc.real_coords.y);
+            GexfJS.ctxGraphe.fillText(display_text, _dnc.real_coords.x, _dnc.real_coords.y - 2);
+            GexfJS.ctxGraphe.fillText(display_text, _dnc.real_coords.x, _dnc.real_coords.y + 2);
             GexfJS.ctxGraphe.fillStyle = "rgb(0,0,0)";
-            GexfJS.ctxGraphe.fillText(_dnc.l, _dnc.real_coords.x, _dnc.real_coords.y);
+            GexfJS.ctxGraphe.fillText(display_text, _dnc.real_coords.x, _dnc.real_coords.y);
         }
 
         GexfJS.ctxMini.putImageData(GexfJS.imageMini, 0, 0);
@@ -1081,7 +1259,13 @@
     function hoverAC() {
         $("#autocomplete li").removeClass("hover");
         $("#liac_" + GexfJS.autoCompletePosition).addClass("hover");
-        GexfJS.params.activeNode = GexfJS.graph.indexOfLabels.indexOf($("#liac_" + GexfJS.autoCompletePosition).text().toLowerCase());
+        GexfJS.params.activeNode = GexfJS.graph.indexOfLabels.indexOf(normalizeText.normalizeText($("#liac_" + GexfJS.autoCompletePosition).text()));
+    }
+
+    function hoverTransAC() {
+        $("#autocomplete li").removeClass("hover");
+        $("#liac_" + GexfJS.autoCompletePosition).addClass("hover");
+        GexfJS.params.activeNode = GexfJS.graph.indexOfTranslations.indexOf(normalizeText.normalizeText($("#liac_" + GexfJS.autoCompletePosition).text()));
     }
 
     function changePosAC(_n) {
@@ -1089,15 +1273,56 @@
         hoverAC();
     }
 
+    function changePosTransAC(_n) {
+        GexfJS.autoCompletePosition = _n;
+        hoverTransAC();
+    }
+
     function updateAutoComplete(_sender) {
-        var _val = $(_sender).val().toLowerCase();
+        var _val = normalizeText.normalizeText($(_sender).val());
         var _ac = $("#autocomplete");
         var _acContent = $('<ul>');
+        var _acTranslationContent = $('<ul>');
         if (_val != GexfJS.lastAC || _ac.html() == "") {
             GexfJS.lastAC = _val;
             var _n = 0;
+	    var ac_content_array = []
+	    GexfJS.graph.indexOfLabels.forEach(function (_l, i) {
+		var pos = _l.indexOf(_val);
+		if (pos != -1) {
+		    ac_content_array.push([i, _l.length, pos])
+		}
+	    })
+	    ac_content_array.sort(function(a, b) {
+		if (a[1] < b[1]) {
+		    return -1; // shortest first
+		} else if (a[1] > b[1]) {
+		    return 1;
+		} else if (a[2] < b[2]) {
+		    return -1; // leftmost first
+		} else if (a[2] > b[2]) {
+		    return 1;
+		} else { return 0;}
+	    })
+	    ac_content_array.slice(0, 20).forEach(function (ac_data) {
+		var closure_n = _n;
+		$('<li>')
+		    .attr("id", "liac_" + _n)
+		    .append($('<a>')
+			    .mouseover(function () {
+				changePosAC(closure_n);
+			    })
+			    .click(function () {
+				displayNode(ac_data[0], true);
+				return false;
+			    })
+			    .text(GexfJS.graph.nodeList[ac_data[0]].l)
+			   )
+		    .appendTo(_acContent);
+		_n++;
+	    });
             GexfJS.graph.indexOfLabels.forEach(function (_l, i) {
-                if (_n < 30 && _l.search(_val) != -1) {
+                if (_n < 20 && _l.search(_val) != -1) {
                     var closure_n = _n;
                     $('<li>')
                         .attr("id", "liac_" + _n)
@@ -1115,14 +1340,41 @@
                     _n++;
                 }
             });
+	    if (typeof(GexfJS.graph.indexOfTranslations) != 'undefined') {
+		GexfJS.graph.indexOfTranslations.forEach(function (_l, i) {
+                    if (_n < 20 && _l.search(_val) != -1) {
+			var closure_n = _n;
+			$('<li>')
+                            .attr("id", "liac_" + _n)
+                            .append($('<a>')
+				    .mouseover(function () {
+					changePosTransAC(closure_n);
+				    })
+				    .click(function () {
+					displayNode(i, true);
+					return false;
+				    })
+				    .text(GexfJS.graph.nodeList[i].l)
+				   )
+                            .appendTo(_acTranslationContent);
+			_n++;
+                    }
+		});
+	    }
             GexfJS.autoCompletePosition = 0;
             _ac.html(
                 $('<div>').append(
                     $('<h4>').text(strLang("nodes"))
                 ).append(_acContent)
             );
+	    if (typeof(GexfJS.graph.indexOfTranslations) != 'undefined') {
+		_ac.append($('<div>').append(
+                    $('<h4>').text("Translations")
+		).append(_acTranslationContent));
+	    }
         }
         hoverAC();
+        if (typeof(GexfJS.graph.indexOfTranslations) != 'undefined') { hoverTransAC(); }
         _ac.show();
     }
 
@@ -1214,7 +1466,7 @@
             });
         $("#recherche").submit(function () {
             if (GexfJS.graph) {
-                displayNode(GexfJS.graph.indexOfLabels.indexOf($("#searchinput").val().toLowerCase()), true);
+                displayNode(GexfJS.graph.indexOfLabels.indexOf(normalizeText.normalizeText($("#searchinput").val())), true);
             }
             return false;
         });
@@ -1321,5 +1573,7 @@
         console.warn('DEPRECATION WARNING: Please use "GexfJS.setParams" instead of "setParams" in config.js');
         GexfJS.setParams(params);
     }
+
+
 
 })();

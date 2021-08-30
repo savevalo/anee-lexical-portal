@@ -1,7 +1,7 @@
 /*** USE THIS FILE TO SET OPTIONS ***/
 
 GexfJS.setParams({
-    graphFile : "miserables.gexf",
+    graphFile : "index.json",
         /*
             The GEXF file to show ! -- can be overriden by adding
             a hash to the document location, e.g. index.html#celegans.gexf
@@ -50,11 +50,11 @@ GexfJS.setParams({
             this setting can't be changed from the User Interface
         */
     showEdgeLabel : true,
-    sortNodeAttributes: true,
+    sortNodeAttributes: false,
         /*
             Alphabetically sort node attributes
          */
-    showId : true,
+    showId : false,
         /*
             Show the id of the node in the list
             this setting can't be changed from the User Interface

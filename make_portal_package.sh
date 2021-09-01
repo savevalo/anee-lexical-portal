@@ -39,7 +39,7 @@ cd egographs
 parallel -j12 python3 $insert_attribs --name \'"$swappedname"\' --swap-translation -o ../../${swapped_dirname}/egographs/{} -i {} ::: *.gexf
 parallel -j12 python3 $gexf2json ::: *.gexf
 
-cd ../$swapped_dirname
+cd ../../$swapped_dirname
 python3 $gexf2json $(delext $(basename $maingraph))-swapped.gexf
 cd egographs
 parallel -j12 python3 $gexf2json ::: *.gexf

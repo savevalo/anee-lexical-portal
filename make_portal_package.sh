@@ -8,7 +8,7 @@ function delext() {
 
 EGO_DEGREE=1
 
-BINROOT="/home/sam/nlp-tools/gexf"
+BINROOT="/home/hardwick/nlp-tools/gexf"
 insert_attribs=$BINROOT/insert_attribs.py
 lexgraph=$BINROOT/lexgraph.py
 gexf2json=$BINROOT/gexf-js/gexf2json.py

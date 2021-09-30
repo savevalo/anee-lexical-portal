@@ -40,6 +40,8 @@
         overviewScale: .25,
         totalScroll: 0,
         autoCompletePosition: 0,
+	nodeHistory: [],
+	nodeHistoryPosition: -1,
         i18n: {
             "az": {
                 "search": "Təpələri axtar",
@@ -305,7 +307,15 @@
 	return label.includes("_");
     }
 
-    function displayNode(_nodeIndex, _recentre) {
+    function displayNode(_nodeIndex, _recentre, _setHistory = true) {
+	if (_setHistory) {
+	    while (GexfJS.nodeHistory.length - 1 > GexfJS.nodeHistoryPosition) { GexfJS.nodeHistory.pop(); }
+	    if (GexfJS.nodeHistory.length == 0 || GexfJS.nodeHistory[GexfJS.nodeHistory.length - 1] != _nodeIndex) {
+		GexfJS.nodeHistory.push(_nodeIndex);
+		GexfJS.nodeHistoryPosition = GexfJS.nodeHistory.length - 1;
+	    }
+	}
+
         GexfJS.params.currentNode = _nodeIndex;
         if (_nodeIndex != -1) {
             var _d = GexfJS.graph.nodeList[_nodeIndex],
@@ -320,6 +330,35 @@
                     left: _cG.width() + "px"
                 });
             });
+	    var _historyarrows = $('<div>').addClass('historyarrows');
+	    var _righthistoryarrow = $('<div>').text('→');
+	    if (GexfJS.nodeHistory.length > 1 && GexfJS.nodeHistory.length - 1 > GexfJS.nodeHistoryPosition) {
+		_righthistoryarrow.addClass('clickablerighthistoryarrow')
+		    .click(function () {
+			++GexfJS.nodeHistoryPosition;
+                        displayNode(GexfJS.nodeHistory[GexfJS.nodeHistoryPosition], true, false);
+                        return false;
+                    })
+	    } else {
+		_righthistoryarrow.addClass('righthistoryarrow');
+	    }
+	    _righthistoryarrow.appendTo(_historyarrows);
+	    
+	    var _lefthistoryarrow = $('<div>').text('←');
+	    if (GexfJS.nodeHistory.length > 0 && GexfJS.nodeHistoryPosition > 0) {
+		_lefthistoryarrow.addClass('clickablelefthistoryarrow')
+		    .click(function () {
+			--GexfJS.nodeHistoryPosition;
+                        displayNode(GexfJS.nodeHistory[GexfJS.nodeHistoryPosition], true, false);
+                        return false;
+                    })
+	    } else {
+		_lefthistoryarrow.addClass('lefthistoryarrow');
+	    }
+	    _lefthistoryarrow.appendTo(_historyarrows);
+	    
+	    _historyarrows.appendTo(_html);
+
             $('<h3>')
                 .append($('<div>').addClass('largepill').css('background', _d.B))
                 .append($('<span>').text(_d.l))
@@ -404,65 +443,6 @@
 		}
 
             });
-
-	    
-		    
-            // GexfJS.graph.edgeList.forEach(function (_e) {
-            //     if (_e.t == _nodeIndex) {
-            //         var _n = GexfJS.graph.nodeList[_e.s];
-            //         var _li = $("<li>");
-            //         $("<div>").addClass("smallpill").css("background", _n.B).appendTo(_li);
-            //         $("<a>")
-            //             .text(_n.l)
-            //             .attr("href", "#")
-            //             .mouseover(function () {
-            //                 GexfJS.params.activeNode = _e.s;
-            //             })
-            //             .click(function () {
-            //                 displayNode(_e.s, true);
-            //                 return false;
-            //             })
-            //             .appendTo(_li);
-            //         if (GexfJS.params.showEdgeLabel) {
-            //             $('<span>').text(" – " + _e.l).appendTo(_li);
-            //         }
-            //         if (GexfJS.params.showEdgeWeight) {
-            //             $('<span>').text(" (" + _e.w + ")").appendTo(_li);
-            //         }
-            //         if (_e.d) {
-            //             _str_in.push(_li);
-            //         } else {
-            //             _str_undir.push(_li);
-            //         }
-            //     }
-            //     if (_e.s == _nodeIndex) {
-            //         var _n = GexfJS.graph.nodeList[_e.t];
-            //         var _li = $("<li>");
-            //         $("<div>").addClass("smallpill").css("background", _n.B).appendTo(_li);
-            //         $("<a>")
-            //             .text(_n.l)
-            //             .attr("href", "#")
-            //             .mouseover(function () {
-            //                 GexfJS.params.activeNode = _e.t;
-            //             })
-            //             .click(function () {
-            //                 displayNode(_e.t, true);
-            //                 return false;
-            //             })
-            //             .appendTo(_li);
-            //         if (GexfJS.params.showEdgeLabel) {
-            //             $('<span>').text(" – " + _e.l).appendTo(_li);
-            //         }
-            //         if (GexfJS.params.showEdgeWeight) {
-            //             $('<span>').text(" (" + _e.w + ")").appendTo(_li);
-            //         }
-            //         if (_e.d) {
-            //             _str_out.push(_li);
-            //         } else {
-            //             _str_undir.push(_li);
-            //         }
-            //     }
-            // });
 
             if (_str_in.length) {
                 $('<h4>').text(strLang("inLinks")).appendTo(_html);

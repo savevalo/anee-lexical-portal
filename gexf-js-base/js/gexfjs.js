@@ -304,7 +304,7 @@
     }
 
     function isProperNoun(label) {
-	return label.includes("_");
+	return label.includes("_") || label[0] !== label[0].toLowerCase();
     }
 
     function displayNode(_nodeIndex, _recentre, _setHistory = true) {

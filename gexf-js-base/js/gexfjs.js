@@ -363,9 +363,12 @@
                 .append($('<div>').addClass('largepill').css('background', _d.B))
                 .append($('<span>').text(_d.l))
                 .appendTo(_html);
-	    $('<h5>').text("Toggle filter on this colour").css("color", _d.B)//.addClass('control')
-		.attr("id", "FilterControl")
-		.click(function() {toggleColorFilter(_d.B); }).appendTo(_html);
+	    $('<h5>').text("Toggle filter on this colour").addClass('control')
+	    	.attr("id", "FilterControl")
+		.click(function() {toggleColorFilter(_d.B); }).
+		.append($("<div>").addClass("smallpill").css("background", _d.B))
+		.appendTo(_html);
+	    //.css("color", _d.B)
             $('<h4>').text(strLang("nodeAttr")).appendTo(_html);
             _ul.appendTo(_html);
             if (GexfJS.params.showId) {

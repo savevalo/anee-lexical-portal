@@ -757,7 +757,6 @@
 			GexfJS.graph.nodeList.forEach(function (_n) {
 			    _n.translation = _n["a"][translation_attr_index][1].replace(/;+$/g, '');
 			    GexfJS.graph.indexOfTranslations.push(normalizeText.normalizeText(_n.translation));
-			    console.log("pushed " + normalizeText.normalizeText(_n.translation))
 			});
 		    }
 
@@ -1096,7 +1095,6 @@
 	    
 	    _d.filtered = (GexfJS.params.colorFilter != null && _d.B !== GexfJS.params.colorFilter)
         }
-	console.log("Found " + nodes_visible + " visible nodes");
 
         var _tagsMisEnValeur = [];
 

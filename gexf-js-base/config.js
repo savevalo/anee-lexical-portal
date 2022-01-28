@@ -16,7 +16,7 @@ GexfJS.setParams({
         /*
             Default state of the "use lens" button. Set to null to disable button.
         */
-    zoomLevel : 0,
+    zoomLevel : 6,
         /*
             Default zoom level. At zoom = 0, the graph should fill a 800x700px zone
          */
@@ -32,7 +32,7 @@ GexfJS.setParams({
         */
     minEdgeWidth : 1,
     maxEdgeWidth : 50,
-    textDisplayThreshold: 9,
+    textDisplayThreshold: 1,
     fontSizeFactor : 1,
     nodeSizeFactor : 1,
         /*
@@ -50,7 +50,7 @@ GexfJS.setParams({
             this setting can't be changed from the User Interface
         */
     showEdgeLabel : true,
-    sortNodeAttributes: false,
+    sortNodeAttributes: true,
         /*
             Alphabetically sort node attributes
          */

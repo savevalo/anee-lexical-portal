@@ -1074,7 +1074,7 @@
         var _centralNode = ((GexfJS.params.activeNode != -1) ? GexfJS.params.activeNode : GexfJS.params.currentNode);
 
 	var min_node_radius = 1000.0;
-	var max_nodes_to_draw = 100;
+	var max_nodes_to_draw = 200;
 	var nodes_visible = 0;
         for (let i = 0; i < GexfJS.graph.index_by_importance.length; ++i) {
             var _d = GexfJS.graph.nodeList[GexfJS.graph.index_by_importance[i]];
@@ -1136,7 +1136,7 @@
                 }
             }
 
-	    var max_edges_to_draw = 100;
+	    var max_edges_to_draw = 500;
 	    var edges_drawn = 0;
             for (let i = 0; i < GexfJS.graph.edge_index_by_importance.length; ++i) {
                 var _d = GexfJS.graph.edgeList[GexfJS.graph.edge_index_by_importance[i]],

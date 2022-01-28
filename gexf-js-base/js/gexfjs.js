@@ -365,7 +365,7 @@
                 .appendTo(_html);
 	    $('<h5>').text("Toggle filter on this colour").addClass('control')
 	    	.attr("id", "FilterControl")
-		.click(function() {toggleColorFilter(_d.B); }).
+		.click(function() {toggleColorFilter(_d.B); })
 		.append($("<div>").addClass("smallpill").css("background", _d.B))
 		.appendTo(_html);
 	    //.css("color", _d.B)

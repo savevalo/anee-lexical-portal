@@ -1335,26 +1335,26 @@
 		_n++;
 		console.log("added " + GexfJS.graph.nodeList[ac_data[0]].l + " in 1");
 	    });
-            GexfJS.graph.indexOfLabels.forEach(function (_l, i) {
-                if (_n < 20 && _l.search(_val) != -1) {
-                    var closure_n = _n;
-                    $('<li>')
-                        .attr("id", "liac_" + _n)
-                        .append($('<a>')
-				.mouseover(function () {
-                                    changePosAC(closure_n);
-				})
-				.click(function () {
-                                    displayNode(i, true);
-                                    return false;
-				})
-				.text(GexfJS.graph.nodeList[i].l)
-                               )
-                        .appendTo(_acContent);
-                    _n++;
-		    console.log("added " + GexfJS.graph.nodeList[i].l + " in 2");
-                }
-            });
+            // GexfJS.graph.indexOfLabels.forEach(function (_l, i) {
+            //     if (_n < 20 && _l.search(_val) != -1) {
+            //         var closure_n = _n;
+            //         $('<li>')
+            //             .attr("id", "liac_" + _n)
+            //             .append($('<a>')
+	    // 			.mouseover(function () {
+            //                         changePosAC(closure_n);
+	    // 			})
+	    // 			.click(function () {
+            //                         displayNode(i, true);
+            //                         return false;
+	    // 			})
+	    // 			.text(GexfJS.graph.nodeList[i].l)
+            //                    )
+            //             .appendTo(_acContent);
+            //         _n++;
+	    // 	    console.log("added " + GexfJS.graph.nodeList[i].l + " in 2");
+            //     }
+            // });
 	    if (typeof(GexfJS.graph.indexOfTranslations) != 'undefined') {
 		GexfJS.graph.indexOfTranslations.forEach(function (_l, i) {
                     if (_n < 20 && _l.search(_val) != -1) {

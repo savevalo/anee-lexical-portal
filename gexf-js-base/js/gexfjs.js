@@ -1333,6 +1333,7 @@
 			   )
 		    .appendTo(_acContent);
 		_n++;
+		console.log("added " + GexfJS.graph.nodeList[ac_data[0]].l " in 1")
 	    });
             GexfJS.graph.indexOfLabels.forEach(function (_l, i) {
                 if (_n < 20 && _l.search(_val) != -1) {
@@ -1351,6 +1352,7 @@
                                )
                         .appendTo(_acContent);
                     _n++;
+		    console.log("added " + GexfJS.graph.nodeList[i].l " in 2")
                 }
             });
 	    if (typeof(GexfJS.graph.indexOfTranslations) != 'undefined') {

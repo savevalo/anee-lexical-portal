@@ -1084,16 +1084,15 @@
                 r: _nodeSizeFactor * _d.r
             };
             _d.withinFrame = ((_d.actual_coords.x + _d.actual_coords.r > 0) && (_d.actual_coords.x - _d.actual_coords.r < GexfJS.graphZone.width) && (_d.actual_coords.y + _d.actual_coords.r > 0) && (_d.actual_coords.y - _d.actual_coords.r < GexfJS.graphZone.height));
+	    _d.filtered = (GexfJS.params.colorFilter != null && _d.B !== GexfJS.params.colorFilter)
 	    if (_d.withinFrame) {
 		min_node_radius = Math.min(min_node_radius, _d.actual_coords.r);
 		    // No node selected, showing everything
 		_d.visible = (GexfJS.params.currentNode == -1 && nodes_visible < max_nodes_to_draw) || i == _centralNode;
-		nodes_visible += _d.visible? 1: 0;
+		nodes_visible += _d.visible && !_d.filtered ? 1: 0;
 	    } else {
 		_d.visible = i == _centralNode;
 	    }
-	    
-	    _d.filtered = (GexfJS.params.colorFilter != null && _d.B !== GexfJS.params.colorFilter)
         }
 
         var _tagsMisEnValeur = [];

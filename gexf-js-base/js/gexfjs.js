@@ -1352,7 +1352,7 @@
                                )
                         .appendTo(_acContent);
                     _n++;
-		    console.log("added " + GexfJS.graph.nodeList[i].l " in 2")
+		    console.log("added " + GexfJS.graph.nodeList[i].l + " in 2");
                 }
             });
 	    if (typeof(GexfJS.graph.indexOfTranslations) != 'undefined') {

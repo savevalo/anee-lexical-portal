@@ -1189,8 +1189,6 @@
 	    }
         }
 
-	_d.real_coords.r = Math.min(_d.real_coords.r, 16.0);
-
         for (var i in GexfJS.graph.nodeList) {
             var _d = GexfJS.graph.nodeList[i];
             if (_d.visible && _d.withinFrame && !_d.filtered) {
@@ -1199,7 +1197,7 @@
                     _d.isTag = (_tagsMisEnValeur.indexOf(parseInt(i)) != -1);
                     GexfJS.ctxGraphe.beginPath();
                     GexfJS.ctxGraphe.fillStyle = ((_tagsMisEnValeur.length && !_d.isTag) ? _d.G : _d.B);
-                    GexfJS.ctxGraphe.arc(_d.real_coords.x, _d.real_coords.y, _d.real_coords.r, 0, Math.PI * 2, true);
+                    GexfJS.ctxGraphe.arc(_d.real_coords.x, _d.real_coords.y, Math.min(_d.real_coords.r, 10.0), 0, Math.PI * 2, true);
                     GexfJS.ctxGraphe.closePath();
                     GexfJS.ctxGraphe.fill();
                 }
@@ -1235,7 +1233,7 @@
         if (_centralNode != -1 && _dnc) {
             GexfJS.ctxGraphe.fillStyle = _dnc.B;
             GexfJS.ctxGraphe.beginPath();
-            GexfJS.ctxGraphe.arc(_dnc.real_coords.x, _dnc.real_coords.y, d.real_coords.r, 0, Math.PI * 2, true);
+            GexfJS.ctxGraphe.arc(_dnc.real_coords.x, _dnc.real_coords.y, Math.min(_d.real_coords.r, 10.0), 0, Math.PI * 2, true);
             GexfJS.ctxGraphe.closePath();
             GexfJS.ctxGraphe.fill();
             GexfJS.ctxGraphe.stroke();

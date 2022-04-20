@@ -95,16 +95,48 @@ h1 a {
     position: absolute; left: 5px; bottom: 5px; list-style: none; padding: 0; margin: 0;
 }
 
+#ctlfilter {
+    position: absolute; left: 40px; bottom: 97px; list-style: none; padding: 0; margin: 0;
+}
+
 #ctlzoom li {
     padding: 0; margin: 10px 0; width: 36px; text-align: center;
+}
+
+#ctlfilter li {
+    padding: 0; margin: 10px 0; width: 16px; text-align: center;
 }
 
 #zoomSliderzone {
     height: 120px;
 }
 
+#filterSliderzone {
+    height: 120px;
+}
+
 #zoomMinusButton, #zoomPlusButton {
     display: block; width: 24px; height: 24px; background:url(../img/plusmoins.png);  margin: 0 auto;
+}
+
+#filterMinusButton, #filterPlusButton {
+    display: block; width: 24px; height: 24px; background:url(../img/plusmoins.png);  margin: 0 auto;
+}
+
+#filterMinusButton {
+    background-position: 0 -24px;
+}
+
+#filterMinusButton:hover {
+    background-position: -24px -24px;
+}
+
+#filterPlusButton {
+    background-position: 0 0;
+}
+
+#filterPlusButton:hover {
+    background-position: -24px 0;
 }
 
 #zoomMinusButton {
@@ -123,7 +155,7 @@ h1 a {
     background-position: -24px 0;
 }
 
-#lensButton, #edgesButton {
+#lensButton, #edgesButton, #labelsbutton {
     display: block; width: 36px; height: 36px; background:url(../img/loupe-edges.png); margin: 0 auto;
 }
 
@@ -159,7 +191,29 @@ h1 a {
     background-position: -108px -36px;
 }
 
+#labelsButton {
+    background-position: -72px -36px;
+}
+
+#labelsButton:hover {
+    background-position: -36px -36px;
+}
+
+#labelsButton.off {
+    background-position: 0 -36px;
+}
+
+#labelsButton.off:hover {
+    background-position: -108px -36px;
+}
+
 #zoomSlider {
+    background:#fff;
+    border:1px solid #aaa;
+    height: 120px; margin: 0 auto;
+}
+
+#filterSlider {
     background:#fff;
     border:1px solid #aaa;
     height: 120px; margin: 0 auto;

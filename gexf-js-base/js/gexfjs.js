@@ -31,12 +31,14 @@
             isMoving: false
         },
         oldParams: {},
-        minZoom: -3,
+        minZoom: 1,
         maxZoom: 100,
+	maxNodesToDraw: 200,
+	maxmaxNodesToDraw: 2000,
         overviewWidth: 200,
         overviewHeight: 175,
-        baseWidth: 800,
-        baseHeight: 700,
+        baseWidth: 800, // 800
+        baseHeight: 700, // 700
         overviewScale: .25,
         totalScroll: 0,
         autoCompletePosition: 0,
@@ -303,8 +305,12 @@
 	}
     }
 
+    function isPersonName(label) {
+	return label.endsWith("_P");
+    }
+
     function isProperNoun(label) {
-	return label.includes("_") || label[0] !== label[0].toLowerCase();
+	return label[0] !== label[0].toLowerCase();
     }
 
     function displayNode(_nodeIndex, _recentre, _setHistory = true) {
@@ -406,7 +412,8 @@
             var _str_in = [],
                 _str_out = [],
                 _str_undir = [],
-		_str_undir_proper = [];
+		_str_undir_proper = [],
+		_str_undir_personal = [];
 	    
 	    var node_weight_id = []
 	    
@@ -425,8 +432,10 @@
             node_weight_id.forEach(function (n_w) {
                 var _li = $("<li>");
                 $("<div>").addClass("smallpill").css("background", n_w[0].B).appendTo(_li);
+		var _label = n_w[0].l;
+		if (isPersonName(_label)) { _label = _label.substring(0, _label.length - 2); }
                 $("<a>")
-                    .text(n_w[0].l)
+                    .text(_label)
                     .attr("href", "#")
                     .mouseover(function () {
                         GexfJS.params.activeNode = n_w[2];
@@ -439,7 +448,9 @@
                 if (GexfJS.params.showEdgeWeight) {
                     $('<span>').text(" (" + n_w[1].toFixed(2) + ")").appendTo(_li);
                 }
-		if (isProperNoun(n_w[0].l)) {
+		if (isPersonName(n_w[0].l)) {
+		    _str_undir_personal.push(_li)
+		} else if (isProperNoun(n_w[0].l)) {
 		    _str_undir_proper.push(_li);
 		} else {
 		    _str_undir.push(_li);
@@ -459,8 +470,12 @@
                 $('<h4>').text("Linked words:").appendTo(_html);
                 $('<ul>').html(_str_undir).appendTo(_html);
             }
-            if (_str_undir.length) {
-                $('<h4>').text("Linked proper nouns:").appendTo(_html);
+            if (_str_undir_personal.length) {
+                $('<h4>').text("Linked personal names:").appendTo(_html);
+                $('<ul>').html(_str_undir_personal).appendTo(_html);
+            }
+            if (_str_undir_proper.length) {
+                $('<h4>').text("Linked non-personal proper nouns:").appendTo(_html);
                 $('<ul>').html(_str_undir_proper).appendTo(_html);
             }
             $("#leftcontent").html(_html);
@@ -694,6 +709,21 @@
         }
     }
 
+    function initializeFilter() {
+        $("#filterSlider").slider({
+            orientation: "vertical",
+            value: GexfJS.maxNodesToDraw,
+            min: 0,
+            max: GexfJS.maxmaxNodesToDraw,
+            range: "min",
+            step: Math.round(GexfJS.maxmaxNodesToDraw/20),
+            slide: function (event, ui) {
+                GexfJS.maxNodesToDraw = ui.value;
+		onStartMoving(); onEndMoving();
+            }
+        });
+    }
+
     function initializeMap() {
         clearInterval(GexfJS.timeRefresh);
         GexfJS.oldParams = {};
@@ -711,6 +741,7 @@
                 onEndMoving();
             }
         });
+	
         $("#overviewzone").css({
             width: GexfJS.overviewWidth + "px",
             height: GexfJS.overviewHeight + "px"
@@ -722,7 +753,6 @@
         GexfJS.timeRefresh = setInterval(traceMap, 60);
         GexfJS.graph = null;
         loadGraph();
-
     }
 
     function loadGraph() {
@@ -740,6 +770,9 @@
                 measureTime("Pre-processing graph");
                 if (isJson) {
 		    GexfJS.graph = data;
+		    GexfJS.maxmaxNodesToDraw = GexfJS.graph.nodeList.length;
+		    initializeFilter();
+
 		    if (!GexfJS.graph.hasOwnProperty("name")) { GexfJS.graph.name = url; }
 		    document.getElementsByName("graphname")[0].innerHTML = GexfJS.graph.name;
 		    if (GexfJS.graph.name.includes("PMI")) {
@@ -925,6 +958,7 @@
 		}
             }
         });
+
     }
 
     function getNodeFromPos(_coords) {
@@ -1074,7 +1108,7 @@
         var _centralNode = ((GexfJS.params.activeNode != -1) ? GexfJS.params.activeNode : GexfJS.params.currentNode);
 
 	var min_node_radius = 1000.0;
-	var max_nodes_to_draw = 200;
+	var max_nodes_to_draw = 100000;
 	var nodes_visible = 0;
         for (let i = 0; i < GexfJS.graph.index_by_importance.length; ++i) {
             var _d = GexfJS.graph.nodeList[GexfJS.graph.index_by_importance[i]];
@@ -1088,7 +1122,7 @@
 	    if (_d.withinFrame) {
 		min_node_radius = Math.min(min_node_radius, _d.actual_coords.r);
 		    // No node selected, showing everything
-		_d.visible = (GexfJS.params.currentNode == -1 && nodes_visible < max_nodes_to_draw) || i == _centralNode;
+		_d.visible = (GexfJS.params.currentNode == -1 && nodes_visible < GexfJS.maxNodesToDraw) || i == _centralNode;
 		nodes_visible += _d.visible && !_d.filtered ? 1: 0;
 	    } else {
 		_d.visible = i == _centralNode;
@@ -1204,6 +1238,7 @@
             }
         }
 	var min_font = 12;
+	if (typeof GexfJS.show_labels === 'undefined' || GexfJS.show_labels) {
         for (var i in GexfJS.graph.nodeList) {
             var _d = GexfJS.graph.nodeList[i];
             if (_d.visible && _d.withinFrame && !_d.filtered) {
@@ -1229,6 +1264,7 @@
                 }
             }
         }
+	}
 
         if (_centralNode != -1 && _dnc) {
             GexfJS.ctxGraphe.fillStyle = _dnc.B;
@@ -1501,6 +1537,22 @@
             return false;
         })
             .attr("title", strLang("zoomIn"));
+	
+	$("#filterMinusButton").click(function () {
+            GexfJS.maxNodesToDraw = Math.max(0, GexfJS.maxNodesToDraw - Math.round(GexfJS.maxmaxNodesToDraw/20));
+            $("#filterSlider").slider("value", GexfJS.maxNodesToDraw);
+	    onStartMoving(); onEndMoving();
+            return false;
+        })
+            .attr("title", "Show less");
+	$("#filterPlusButton").click(function () {
+            GexfJS.maxNodesToDraw = Math.min(GexfJS.maxmaxNodesToDraw, GexfJS.maxNodesToDraw + Math.round(GexfJS.maxmaxNodesToDraw/20));
+            $("#filterSlider").slider("value", GexfJS.maxNodesToDraw);
+	    onStartMoving(); onEndMoving();
+            return false;
+        })
+            .attr("title", "Show more");
+
         $(document).click(function (evt) {
             $("#autocomplete").slideUp();
         });
@@ -1567,6 +1619,8 @@
         console.warn('DEPRECATION WARNING: Please use "GexfJS.setParams" instead of "setParams" in config.js');
         GexfJS.setParams(params);
     }
+
+
 
 
 

@@ -33,6 +33,7 @@
         oldParams: {},
         minZoom: 1,
         maxZoom: 100,
+	showLabels: true,
 	maxNodesToDraw: 200,
 	maxmaxNodesToDraw: 2000,
         overviewWidth: 200,
@@ -1238,7 +1239,7 @@
             }
         }
 	var min_font = 12;
-	if (typeof GexfJS.show_labels === 'undefined' || GexfJS.show_labels) {
+	if (typeof GexfJS.showLabels === 'undefined' || GexfJS.showLabels) {
         for (var i in GexfJS.graph.nodeList) {
             var _d = GexfJS.graph.nodeList[i];
             if (_d.visible && _d.withinFrame && !_d.filtered) {
@@ -1409,8 +1410,10 @@
     }
 
     function updateButtonStates() {
-        $("#lensButton").attr("class", GexfJS.params.useLens ? "" : "off")
-            .attr("title", strLang(GexfJS.params.showEdges ? "lensOff" : "lensOn"));
+        $("#lensButton").attr("class", GexfJS.showLabels ? "" : "off")
+	    .attr("title", strLang(GexfJS.showLabels ? "lensOff" : "lensOn"));
+//	$("#lensButton").attr("class", GexfJS.params.useLens ? "" : "off")
+//            .attr("title", strLang(GexfJS.params.showEdges ? "lensOff" : "lensOn"));
 
         $("#edgesButton").attr("class", GexfJS.params.showEdges ? "" : "off")
             .attr("title", strLang(GexfJS.params.showEdges ? "edgeOff" : "edgeOn"));
@@ -1567,8 +1570,10 @@
             $("#edgesButton").hide();
         }
         $("#lensButton").click(function () {
-            GexfJS.params.useLens = !GexfJS.params.useLens;
+//            GexfJS.params.useLens = !GexfJS.params.useLens;
+            GexfJS.showLabels = !GexfJS.showLabels;
             updateButtonStates();
+	    onStartMoving(); onEndMoving();
             return false;
         });
         $("#edgesButton").click(function () {

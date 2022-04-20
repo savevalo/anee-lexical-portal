@@ -1239,6 +1239,7 @@
             }
         }
 	var min_font = 12;
+	var max_font = 72;
 	if (typeof GexfJS.showLabels === 'undefined' || GexfJS.showLabels) {
         for (var i in GexfJS.graph.nodeList) {
             var _d = GexfJS.graph.nodeList[i];
@@ -1249,15 +1250,15 @@
                         if (_centralNode != -1) {
                             var _dist = Math.sqrt(Math.pow(_d.real_coords.x - _dnc.real_coords.x, 2) + Math.pow(_d.real_coords.y - _dnc.real_coords.y, 2));
                             if (_dist > 80) {
-                                _fs = Math.max(GexfJS.params.textDisplayThreshold + 2, _fs, min_font);
+                                _fs = Math.min(Math.max(GexfJS.params.textDisplayThreshold + 2, _fs, min_font), max_font);
                             }
                         } else {
-                            _fs = Math.max(GexfJS.params.textDisplayThreshold + 2, _fs, min_font);
+                            _fs = Math.min(Math.max(GexfJS.params.textDisplayThreshold + 2, _fs, min_font), max_font);
                         }
                     }
                     if (_fs > GexfJS.params.textDisplayThreshold) {
                         GexfJS.ctxGraphe.fillStyle = ((i != GexfJS.params.activeNode) && _tagsMisEnValeur.length && ((!_d.isTag) || (_centralNode != -1)) ? "rgba(60,60,60,0.7)" : "rgb(0,0,0)");
-                        GexfJS.ctxGraphe.font = Math.floor(Math.max(_fs, min_font)) + "px Arial";
+                        GexfJS.ctxGraphe.font = Math.floor(Math.min(Math.max(_fs, min_font), max_font)) + "px Arial";
                         GexfJS.ctxGraphe.textAlign = "center";
                         GexfJS.ctxGraphe.textBaseline = "middle";
                         GexfJS.ctxGraphe.fillText(_d.l , _d.real_coords.x, _d.real_coords.y);

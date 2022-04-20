@@ -1239,7 +1239,7 @@
             }
         }
 	var min_font = 12;
-	var max_font = 72;
+	var max_font = 60;
 	if (typeof GexfJS.showLabels === 'undefined' || GexfJS.showLabels) {
         for (var i in GexfJS.graph.nodeList) {
             var _d = GexfJS.graph.nodeList[i];

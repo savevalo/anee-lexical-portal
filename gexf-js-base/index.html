@@ -19,26 +19,11 @@
         <script type="text/javascript" src="config.js"></script>
     </head>
     <body>
-        <div id="zonecentre" class="gradient">
-            <canvas id="carte" width="0" height="0"></canvas>
-            <ul id="ctlzoom">
-                <li>
-                    <a href="#" id="zoomPlusButton" title="S'approcher"> </a>
-                </li>
-                <li id="zoomSliderzone">
-                    <div id="zoomSlider"></div>
-                </li>
-                <li>
-                    <a href="#" id="zoomMinusButton" title="S'éloigner"> </a>
-                </li>
-                <li>
-                    <a href="#" id="lensButton"> </a>
-                </li>
-                <li>
-                    <a href="#" id="edgesButton"> </a>
-                </li>
-            </ul>
-            <ul id="ctlfilter">
+
+      <div id="zonecentre" class="gradient">
+	                <canvas id="carte" width="0" height="0"></canvas>
+
+			<ul id="ctlzoom">
                 <li>
                     <a href="#" id="filterPlusButton" title="Show more"> </a>
                 </li>
@@ -49,8 +34,46 @@
                     <a href="#" id="filterMinusButton" title="Show less"> </a>
                 </li>
 		<li>
-                    <a href="#" id="labelsButton"> </a>
+		  <p id="whitespan" style="width: 60px"><b>Show less</b></p>
+		</li>
+		<!-- <li> -->
+                <!--     <a href="#" id="labelsButton"> </a> -->
+                <!-- </li> -->
+		
+            <!-- </ul> -->
+
+            <!-- <ul id="ctlzoom"> -->
+                <li>
+                    <a href="#" id="zoomPlusButton" title="S'approcher"> </a>
                 </li>
+                <li id="zoomSliderzone">
+                    <div id="zoomSlider"></div>
+                </li>
+                <li>
+                    <a href="#" id="zoomMinusButton" title="S'éloigner"> </a>
+                </li>
+			  <li>
+		  <p id="whitespan" style="width: 60px"><b>Zoom</b></p>
+		</li>
+
+                <!-- <li> -->
+                <!--     <a href="#" id="lensButton"> </a> -->
+			    <!-- </li> -->
+			  <li>
+			    <input type="checkbox" id="label_checkbox">
+			    <label for="label_checkbox">Show labels</label>
+			  </li>
+
+			  <li>
+			    <input type="checkbox" id="edge_checkbox">
+			    <label for="edge_checkbox">Show edges</label>
+			  </li>
+			  <li>
+			    <form id="labelfilter"><input style="width:100px" id="filterinput" placeholder="Label filter" /></form>
+			  </li>
+                <!-- <li> -->
+                <!--     <a href="#" id="edgesButton"> </a> -->
+                <!-- </li> -->
             </ul>
         </div>
         <div id="overviewzone" class="gradient">

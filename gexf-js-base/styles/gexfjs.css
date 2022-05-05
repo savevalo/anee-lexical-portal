@@ -12,7 +12,7 @@ body {
 }
 
 .gradient {
-    background-color: #f0f0f8; 
+    background-color: #f0f0f8;  */
     background-image: -webkit-radial-gradient(#ffffff, #d8d8e0); background-image: -moz-radial-gradient(#ffffff, #d8d8e0);
 }
 
@@ -35,6 +35,13 @@ body {
 /* #headertext { */
 /*     position: absolute; right: 0px; top: 0px; text-align: center; width: 320px; padding-right: 40px; border: none; background: none; */
 /* } */
+
+#whitespan {
+    background-color: white;
+    font-size: 110%;
+    border-radius: 22px;
+    padding: 6px;
+}
 
 
 h1 {
@@ -96,7 +103,9 @@ h1 a {
 }
 
 #ctlfilter {
-    position: absolute; left: 40px; bottom: 97px; list-style: none; padding: 0; margin: 0;
+    position: absolute; left: 15px; bottom: 220px; list-style: none; padding: 0; margin: 0;
+        /* writing-mode: vertical-rl; text-orientation: mixed; */
+
 }
 
 #ctlzoom li {
@@ -108,11 +117,11 @@ h1 a {
 }
 
 #zoomSliderzone {
-    height: 120px;
+    height: 60px;
 }
 
 #filterSliderzone {
-    height: 120px;
+    height: 60px;
 }
 
 #zoomMinusButton, #zoomPlusButton {
@@ -210,13 +219,13 @@ h1 a {
 #zoomSlider {
     background:#fff;
     border:1px solid #aaa;
-    height: 120px; margin: 0 auto;
+    height: 60px; margin: 0 auto;
 }
 
 #filterSlider {
     background:#fff;
     border:1px solid #aaa;
-    height: 120px; margin: 0 auto;
+    height: 60px; margin: 0 auto;
 }
 
 /* EN BAS A GAUCHE */

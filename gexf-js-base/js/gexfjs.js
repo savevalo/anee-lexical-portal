@@ -32,10 +32,10 @@
         },
         oldParams: {},
         minZoom: 1,
-        maxZoom: 100,
-	showLabels: true,
-	maxNodesToDraw: 200,
-	maxmaxNodesToDraw: 2000,
+        maxZoom: 20,
+	showLabels: false,
+	proportionOfNodesToDraw: 1.0,
+	textFilter: "",
         overviewWidth: 200,
         overviewHeight: 175,
         baseWidth: 800, // 800
@@ -713,13 +713,13 @@
     function initializeFilter() {
         $("#filterSlider").slider({
             orientation: "vertical",
-            value: GexfJS.maxNodesToDraw,
-            min: 0,
-            max: GexfJS.maxmaxNodesToDraw,
+            value: GexfJS.proportionOfNodesToDraw,
+            min: 0.0,
+            max: 1.0,
             range: "min",
-            step: Math.round(GexfJS.maxmaxNodesToDraw/20),
+            step: 0.01,
             slide: function (event, ui) {
-                GexfJS.maxNodesToDraw = ui.value;
+                GexfJS.proportionOfNodesToDraw = ui.value;
 		onStartMoving(); onEndMoving();
             }
         });
@@ -771,7 +771,6 @@
                 measureTime("Pre-processing graph");
                 if (isJson) {
 		    GexfJS.graph = data;
-		    GexfJS.maxmaxNodesToDraw = GexfJS.graph.nodeList.length;
 		    initializeFilter();
 
 		    if (!GexfJS.graph.hasOwnProperty("name")) { GexfJS.graph.name = url; }
@@ -1025,6 +1024,10 @@
         ctx.lineWidth = tmp;
     }
 
+    function maxNodesToDraw() {
+	return Math.pow(GexfJS.proportionOfNodesToDraw, (3/4)) * GexfJS.graph.nodeList.length;
+    }
+
     function traceArc(ctx, source, target, arrow_size, draw_arrow) {
         ctx.beginPath();
         ctx.moveTo(source.x, source.y);
@@ -1109,7 +1112,6 @@
         var _centralNode = ((GexfJS.params.activeNode != -1) ? GexfJS.params.activeNode : GexfJS.params.currentNode);
 
 	var min_node_radius = 1000.0;
-	var max_nodes_to_draw = 100000;
 	var nodes_visible = 0;
         for (let i = 0; i < GexfJS.graph.index_by_importance.length; ++i) {
             var _d = GexfJS.graph.nodeList[GexfJS.graph.index_by_importance[i]];
@@ -1119,11 +1121,12 @@
                 r: _nodeSizeFactor * _d.r
             };
             _d.withinFrame = ((_d.actual_coords.x + _d.actual_coords.r > 0) && (_d.actual_coords.x - _d.actual_coords.r < GexfJS.graphZone.width) && (_d.actual_coords.y + _d.actual_coords.r > 0) && (_d.actual_coords.y - _d.actual_coords.r < GexfJS.graphZone.height));
-	    _d.filtered = (GexfJS.params.colorFilter != null && _d.B !== GexfJS.params.colorFilter)
+	    _d.filtered = (GexfJS.params.colorFilter != null && _d.B !== GexfJS.params.colorFilter) ||
+		(GexfJS.textFilter !== "" && !normalizeText.normalizeText(_d.l).includes(GexfJS.textFilter) && !normalizeText.normalizeText(GexfJS.graph.indexOfTranslations[GexfJS.graph.index_by_importance[i]]).includes(GexfJS.textFilter));
 	    if (_d.withinFrame) {
 		min_node_radius = Math.min(min_node_radius, _d.actual_coords.r);
 		    // No node selected, showing everything
-		_d.visible = (GexfJS.params.currentNode == -1 && nodes_visible < GexfJS.maxNodesToDraw) || i == _centralNode;
+		_d.visible = (GexfJS.params.currentNode == -1 && nodes_visible < maxNodesToDraw()) || i == _centralNode;
 		nodes_visible += _d.visible && !_d.filtered ? 1: 0;
 	    } else {
 		_d.visible = i == _centralNode;
@@ -1410,15 +1413,15 @@
         _ac.show();
     }
 
-    function updateButtonStates() {
-        $("#lensButton").attr("class", GexfJS.showLabels ? "" : "off")
-	    .attr("title", strLang(GexfJS.showLabels ? "lensOff" : "lensOn"));
-//	$("#lensButton").attr("class", GexfJS.params.useLens ? "" : "off")
-//            .attr("title", strLang(GexfJS.params.showEdges ? "lensOff" : "lensOn"));
+//     function updateButtonStates() {
+//         $("#lensButton").attr("class", GexfJS.showLabels ? "" : "off")
+// 	    .attr("title", strLang(GexfJS.showLabels ? "lensOff" : "lensOn"));
+// //	$("#lensButton").attr("class", GexfJS.params.useLens ? "" : "off")
+// //            .attr("title", strLang(GexfJS.params.showEdges ? "lensOff" : "lensOn"));
 
-        $("#edgesButton").attr("class", GexfJS.params.showEdges ? "" : "off")
-            .attr("title", strLang(GexfJS.params.showEdges ? "edgeOff" : "edgeOn"));
-    }
+//         $("#edgesButton").attr("class", GexfJS.params.showEdges ? "" : "off")
+//             .attr("title", strLang(GexfJS.params.showEdges ? "edgeOff" : "edgeOn"));
+//     }
 
     GexfJS.setParams = function setParams(paramlist) {
         for (var i in paramlist) {
@@ -1443,7 +1446,7 @@
         );
         GexfJS.lang = (GexfJS.i18n[lang] ? lang : "en");
 
-        updateButtonStates();
+        // updateButtonStates();
 
         GexfJS.ctxGraphe = document.getElementById('carte').getContext('2d');
         GexfJS.ctxMini = document.getElementById('overview').getContext('2d');
@@ -1453,6 +1456,10 @@
 
         window.onhashchange = initializeMap;
 
+	$("#filterinput").keyup(function (evt) {
+	    GexfJS.textFilter = normalizeText.normalizeText($(this).val());
+	    onStartMoving(); onEndMoving();
+	});
         $("#searchinput")
             .focus(function () {
                 if ($(this).is('.grey')) {
@@ -1543,15 +1550,15 @@
             .attr("title", strLang("zoomIn"));
 	
 	$("#filterMinusButton").click(function () {
-            GexfJS.maxNodesToDraw = Math.max(0, GexfJS.maxNodesToDraw - Math.round(GexfJS.maxmaxNodesToDraw/20));
-            $("#filterSlider").slider("value", GexfJS.maxNodesToDraw);
+            GexfJS.proportionOfNodesToDraw = Math.max(0, GexfJS.proportionOfNodesToDraw - 0.01);
+            $("#filterSlider").slider("value", GexfJS.proportionOfNodesToDraw);
 	    onStartMoving(); onEndMoving();
             return false;
         })
             .attr("title", "Show less");
 	$("#filterPlusButton").click(function () {
-            GexfJS.maxNodesToDraw = Math.min(GexfJS.maxmaxNodesToDraw, GexfJS.maxNodesToDraw + Math.round(GexfJS.maxmaxNodesToDraw/20));
-            $("#filterSlider").slider("value", GexfJS.maxNodesToDraw);
+            GexfJS.proportionOfNodesToDraw = Math.min(1.0, GexfJS.proportionOfNodesToDraw + 0.01);
+            $("#filterSlider").slider("value", GexfJS.proportionOfNodesToDraw);
 	    onStartMoving(); onEndMoving();
             return false;
         })
@@ -1570,17 +1577,15 @@
         if (GexfJS.params.showEdges === null) {
             $("#edgesButton").hide();
         }
-        $("#lensButton").click(function () {
-//            GexfJS.params.useLens = !GexfJS.params.useLens;
+        $("#label_checkbox").click(function () {
             GexfJS.showLabels = !GexfJS.showLabels;
-            updateButtonStates();
+	    $(this).prop("checked", GexfJS.showLabels);
 	    onStartMoving(); onEndMoving();
-            return false;
         });
-        $("#edgesButton").click(function () {
+        $("#edge_checkbox").click(function () {
             GexfJS.params.showEdges = !GexfJS.params.showEdges;
-            updateButtonStates();
-            return false;
+	    $(this).prop("checked", GexfJS.params.showEdges);
+	    onStartMoving(); onEndMoving();
         });
         $("#aUnfold").click(function () {
             var _cG = $("#leftcolumn");

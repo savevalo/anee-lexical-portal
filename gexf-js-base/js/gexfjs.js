@@ -276,14 +276,13 @@
                 _res = text.split(_urlExp);
             return _res.map(function (_txt) {
                 if (_txt.match(_urlExp)) {
-		    _target = "_self";
 		    if (linktext == null) {
 			linktext = _txt.replace(_protocolExp, '');
 			_target = "_blank";
 		    }
                     return $('<a>').attr({
                         href: (_protocolExp.test(_txt) ? '' : 'http://') + _txt,
-                        target: _target
+                        target: "_blank"
                     }).text(linktext);
                 } else if (_txt.startsWith('index.html')) {
 		    return $('<a>').attr({
@@ -964,7 +963,7 @@
     function getNodeFromPos(_coords) {
         for (var i = GexfJS.graph.nodeList.length - 1; i >= 0; i--) {
             var _d = GexfJS.graph.nodeList[i];
-            if (_d.visible && _d.withinFrame) {
+            if (_d.visible && _d.withinFrame && !_d.filtered) {
                 var _c = _d.actual_coords;
                 _r = Math.sqrt(Math.pow(_c.x - _coords.x, 2) + Math.pow(_c.y - _coords.y, 2));
                 if (_r < _c.r) {
@@ -1028,6 +1027,18 @@
 	return Math.pow(GexfJS.proportionOfNodesToDraw, (3/4)) * GexfJS.graph.nodeList.length;
     }
 
+    function subarray_of(a, b) {
+	if (b.length === 0) { return true; }
+	if (b.length > a.length) { return false; }
+	for (let i = 0; i <= a.length - b.length; ++i) {
+	    for (let j = 0; j < b.length; ++j) {
+		if (a[i+j] !== b[j]) { break; }
+		if (j === b.length - 1) { return true; }
+	    }
+	}
+	return false;
+    }
+    
     function traceArc(ctx, source, target, arrow_size, draw_arrow) {
         ctx.beginPath();
         ctx.moveTo(source.x, source.y);
@@ -1121,8 +1132,22 @@
                 r: _nodeSizeFactor * _d.r
             };
             _d.withinFrame = ((_d.actual_coords.x + _d.actual_coords.r > 0) && (_d.actual_coords.x - _d.actual_coords.r < GexfJS.graphZone.width) && (_d.actual_coords.y + _d.actual_coords.r > 0) && (_d.actual_coords.y - _d.actual_coords.r < GexfJS.graphZone.height));
-	    _d.filtered = (GexfJS.params.colorFilter != null && _d.B !== GexfJS.params.colorFilter) ||
-		(GexfJS.textFilter !== "" && !normalizeText.normalizeText(_d.l).includes(GexfJS.textFilter) && !normalizeText.normalizeText(GexfJS.graph.indexOfTranslations[GexfJS.graph.index_by_importance[i]]).includes(GexfJS.textFilter));
+	    var filtered_by_textfilter = (GexfJS.textFilter !== ""); // Defaultly filtered if there's a filter, but..
+	    if (filtered_by_textfilter) {
+		let label = normalizeText.normalizeText(_d.l);
+		let translation = normalizeText.normalizeText(GexfJS.graph.indexOfTranslations[GexfJS.graph.index_by_importance[i]]);
+		if (GexfJS.textFilter.startsWith('"') && GexfJS.textFilter.endsWith('"')) {
+		    // Special quoted string filter matches whole words only
+		    // let unquoted = GexfJS.textFilter.substring(1, GexfJS.textFilter.length - 1);
+		    let unquoted_parts = GexfJS.textFilter.substring(1, GexfJS.textFilter.length - 1).split(" ")
+		    let label_parts = label.split(" ")
+		    let trans_parts = translation.split(" ")
+		    filtered_by_textfilter = (!subarray_of(label_parts, unquoted_parts) && !subarray_of(trans_parts, unquoted_parts))
+		} else {
+		    filtered_by_textfilter = (!label.includes(GexfJS.textFilter) && !translation.includes(GexfJS.textFilter));
+		}
+	    }
+	    _d.filtered = (GexfJS.params.colorFilter != null && _d.B !== GexfJS.params.colorFilter) || filtered_by_textfilter;
 	    if (_d.withinFrame) {
 		min_node_radius = Math.min(min_node_radius, _d.actual_coords.r);
 		    // No node selected, showing everything
@@ -1173,8 +1198,6 @@
                 }
             }
 
-	    var max_edges_to_draw = 500;
-	    var edges_drawn = 0;
             for (let i = 0; i < GexfJS.graph.edge_index_by_importance.length; ++i) {
                 var _d = GexfJS.graph.edgeList[GexfJS.graph.edge_index_by_importance[i]],
                     _six = _d.s,
@@ -1197,8 +1220,7 @@
                     }
                 }
 
-                if ((_isLinked || _showAllEdges) && (_ds.withinFrame || _dt.withinFrame) && _ds.visible && _dt.visible && (!_ds.filtered && !_dt.filtered) && edges_drawn < max_edges_to_draw) {
-		    ++edges_drawn;
+                if ((_isLinked || _showAllEdges) && (_ds.withinFrame || _dt.withinFrame) && _ds.visible && _dt.visible && (!_ds.filtered && !_dt.filtered)) {
                     var _coords = ((GexfJS.params.useLens && GexfJS.mousePosition) ? calcCoord(GexfJS.mousePosition.x, GexfJS.mousePosition.y, _ds.actual_coords) : _ds.actual_coords);
                     _coordt = ((GexfJS.params.useLens && GexfJS.mousePosition) ? calcCoord(GexfJS.mousePosition.x, GexfJS.mousePosition.y, _dt.actual_coords) : _dt.actual_coords);
 		    var _dist = Math.sqrt(Math.pow(_coords.x - _coordt.x, 2) + Math.pow(_coords.y - _coordt.y, 2));

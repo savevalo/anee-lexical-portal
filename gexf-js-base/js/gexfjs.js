@@ -961,12 +961,13 @@
     }
 
     function getNodeFromPos(_coords) {
+	let node_radius_upper_limit = 80;
         for (var i = GexfJS.graph.nodeList.length - 1; i >= 0; i--) {
             var _d = GexfJS.graph.nodeList[i];
             if (_d.visible && _d.withinFrame && !_d.filtered) {
                 var _c = _d.actual_coords;
                 _r = Math.sqrt(Math.pow(_c.x - _coords.x, 2) + Math.pow(_c.y - _coords.y, 2));
-                if (_r < _c.r) {
+                if (_r < Math.min(_c.r, node_radius_upper_limit)) {
                     return i;
                 }
             }
@@ -1249,6 +1250,7 @@
 	    }
         }
 
+	let node_radius_upper_limit = 60;
         for (var i in GexfJS.graph.nodeList) {
             var _d = GexfJS.graph.nodeList[i];
             if (_d.visible && _d.withinFrame && !_d.filtered) {
@@ -1257,14 +1259,14 @@
                     _d.isTag = (_tagsMisEnValeur.indexOf(parseInt(i)) != -1);
                     GexfJS.ctxGraphe.beginPath();
                     GexfJS.ctxGraphe.fillStyle = ((_tagsMisEnValeur.length && !_d.isTag) ? _d.G : _d.B);
-                    GexfJS.ctxGraphe.arc(_d.real_coords.x, _d.real_coords.y, _d.real_coords.r, 0, Math.PI * 2, true);
+                    GexfJS.ctxGraphe.arc(_d.real_coords.x, _d.real_coords.y, Math.min(_d.real_coords.r, node_radius_upper_limit), 0, Math.PI * 2, true);
                     GexfJS.ctxGraphe.closePath();
                     GexfJS.ctxGraphe.fill();
                 }
             }
         }
-	var min_font = 12;
-	var max_font = 60;
+	let min_font = 12;
+	let max_font = 60;
 	if (typeof GexfJS.showLabels === 'undefined' || GexfJS.showLabels) {
         for (var i in GexfJS.graph.nodeList) {
             var _d = GexfJS.graph.nodeList[i];
@@ -1296,12 +1298,12 @@
         if (_centralNode != -1 && _dnc) {
             GexfJS.ctxGraphe.fillStyle = _dnc.B;
             GexfJS.ctxGraphe.beginPath();
-            GexfJS.ctxGraphe.arc(_dnc.real_coords.x, _dnc.real_coords.y, _dnc.real_coords.r, 0, Math.PI * 2, true);
+            GexfJS.ctxGraphe.arc(_dnc.real_coords.x, _dnc.real_coords.y, Math.min(_dnc.real_coords.r, node_radius_upper_limit*1.2), 0, Math.PI * 2, true);
             GexfJS.ctxGraphe.closePath();
             GexfJS.ctxGraphe.fill();
             GexfJS.ctxGraphe.stroke();
             var _fs = Math.max(GexfJS.params.textDisplayThreshold + 2, _dnc.real_coords.r * _textSizeFactor, min_font - 2) + 2
-            GexfJS.ctxGraphe.font = "bold " + Math.floor(_fs) + "px Arial";
+            GexfJS.ctxGraphe.font = "bold " + Math.max(min_font, Math.min(Math.floor(_fs), max_font + 8)) + "px Arial";
             GexfJS.ctxGraphe.textAlign = "center";
             GexfJS.ctxGraphe.textBaseline = "middle";
             GexfJS.ctxGraphe.fillStyle = "rgba(255,255,250,0.8)";

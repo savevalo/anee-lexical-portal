@@ -799,8 +799,14 @@
 			for (let i = 0; i < GexfJS.graph.nodeList.length; ++i) {
 			    GexfJS.graph.index_by_importance[i] = i;
 			}
-			GexfJS.graph.index_by_importance.sort((a, b) => {
-			    GexfJS.graph.nodeList[b]["a"][importance_index][1] - GexfJS.graph.nodeList[a]["a"][importance_index][1] });
+			console.log(GexfJS.graph.nodeList[GexfJS.graph.index_by_importance[0]]["a"][importance_index]);
+			console.log(GexfJS.graph.nodeList[GexfJS.graph.index_by_importance[1]]["a"][importance_index]);
+			console.log(GexfJS.graph.nodeList[GexfJS.graph.index_by_importance[2]]["a"][importance_index]);
+			GexfJS.graph.index_by_importance.sort((a, b) => 
+			    GexfJS.graph.nodeList[b]["a"][importance_index][1] - GexfJS.graph.nodeList[a]["a"][importance_index][1] );
+			console.log(GexfJS.graph.nodeList[GexfJS.graph.index_by_importance[0]]["a"][importance_index]);
+			console.log(GexfJS.graph.nodeList[GexfJS.graph.index_by_importance[1]]["a"][importance_index]);
+			console.log(GexfJS.graph.nodeList[GexfJS.graph.index_by_importance[2]]["a"][importance_index]);
 		    }
 		    // Center view on most important node (this is overridden later if it's an ego graph)
 		    GexfJS.params.centreX = GexfJS.graph.nodeList[GexfJS.graph.index_by_importance[0]].x;

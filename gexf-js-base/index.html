@@ -25,16 +25,17 @@
 
 			<ul id="ctlzoom">
                 <li>
-                    <a href="#" id="filterPlusButton" title="Show more"> </a>
+                    <a href="#" id="filterPlusButton" class="tooltip" alt="Show more nodes"> </a>
                 </li>
                 <li id="filterSliderzone">
-                    <div id="filterSlider"></div>
+		  <a href="#" id="filterSliderTooltip" class="tooltip" alt="Node size filter">
+                    <div id="filterSlider"></div></a>
                 </li>
                 <li>
-                    <a href="#" id="filterMinusButton" title="Show less"> </a>
+                    <a href="#" id="filterMinusButton" class="tooltip" alt="Show fewer nodes"> </a>
                 </li>
 		<li>
-		  <p id="whitespan" style="width: 60px"><b>Show less</b></p>
+		  <p id="whitespan" style="width: 60px"><b>Node size filter</b></p>
 		</li>
 		<!-- <li> -->
                 <!--     <a href="#" id="labelsButton"> </a> -->
@@ -69,7 +70,7 @@
 			    <label for="edge_checkbox">Show edges</label>
 			  </li>
 			  <li>
-			    <form id="labelfilter"><input style="width:100px" id="filterinput" placeholder="Label filter" /></form>
+			    <form id="labelfilter"><a href="#" class="tooltiplower" alt="If this field is nonempty, nodes that don't contain the text in either their translation or lemma field are hidden. You can use quotes to match only whole words."><input style="width:100px" id="filterinput" placeholder="Label filter" /></a></form>
 			  </li>
                 <!-- <li> -->
                 <!--     <a href="#" id="edgesButton"> </a> -->
@@ -81,7 +82,7 @@
         </div>
         <div id="leftcolumn">
             <div id="unfold">
-                <a href="#" id="aUnfold" class="rightarrow"> </a>
+                <a href="#" id="aUnfold" class="rightarrow tooltip" alt="Expand side panel"> </a>
             </div>
             <div id="leftcontent"></div>
         </div>
@@ -90,9 +91,12 @@
                 <h1><a href="http://gephi.org/" target="_blank" title="Made with Gephi">Gephi: JavaScript GEXF Viewer</a></h1>
             </div>
             <form id="recherche">
-                <input id="searchinput" class="grey" autocomplete="off" />
+	      <!-- <span class="tooltiptext">Tooltip text</span> -->
+	      <a href="#" alt="Search translations and lemmas" class="tooltip">
+                <input id="searchinput" class="grey" autocomplete="off" /></a>
                 <input id="searchsubmit" type="submit" />
             </form>
+	    <a href="#" >
 	    <div id="backbutton"><b><span name="graphname"></span></b> | <a href="" id="mainPageLink">Main page</a> | <a href="index.html">Main graph</a> | <a href="index.gexf" download="gexf-js-export.gexf">Download</a></div>
 	    <!-- <div id="headertext"><p>[ANEE logo]</p></div> -->
         </div>

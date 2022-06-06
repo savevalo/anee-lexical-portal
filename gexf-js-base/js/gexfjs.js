@@ -365,8 +365,13 @@
 	    
 	    _historyarrows.appendTo(_html);
 
+	    var _largepill = $('<a>').attr("href", "#").addClass("tooltip")
+		.attr("alt", "Color filter " + (GexfJS.params.colorFilter == null ? "off": "on") )
+		.click(function() {$(this).attr("alt", "Color filter " + (GexfJS.params.colorFilter == null ? "off": "on") );})
+		.append($('<div>').addClass('largepill').css('background', _d.B).click(function() {toggleColorFilter(_d.B); }));
+	
             $('<h3>')
-                .append($('<div>').addClass('largepill').css('background', _d.B)).click(function() {toggleColorFilter(_d.B); })
+                .append(_largepill)
                 .append($('<span>').text(_d.l))
                 .appendTo(_html);
 	    // $('<h5>').text("Toggle filter on this colour").addClass('control')
@@ -397,7 +402,13 @@
 		    if (attrib_name == 'freqrank') {
 			attrib_name = "Frequency rank";
 		    }
-                    $("<b>").text(attrib_name + ": ").appendTo(_li);
+		    if (attrib_name == "degree") {
+			$('<a>').attr("href", "#").addClass("tooltip").css("color", "black").attr("alt", "Number of connections").append($("<span>").append($("<b>").text(attrib_name + ": "))).appendTo(_li);
+		    } else if (attrib_name == "weighted degree") {
+			$('<a>').attr("href", "#").addClass("tooltip").css("color", "black").attr("alt", "Sum of connection weights").append($("<span>").append($("<b>").text(attrib_name + ": "))).appendTo(_li);
+		    } else {
+			$("<b>").text(attrib_name + ": ").appendTo(_li);
+		    }
                     if (attrkey === 'image') {
 			$('<br>').appendTo(_li);
 			$('<img>').attr("src", attr[1]).appendTo(_li).addClass("attrimg");
@@ -720,8 +731,11 @@
             slide: function (event, ui) {
                 GexfJS.proportionOfNodesToDraw = ui.value;
 		onStartMoving(); onEndMoving();
-            }
+            },
         });
+	$("#filterSliderTooltip").mousemove(function () {
+	    $(this).attr("alt", "Showing up to " + parseInt((maxNodesToDraw()/GexfJS.graph.nodeList.length)*100) + "% (" + parseInt(maxNodesToDraw()) + ") of nodes" );
+	})
     }
 
     function initializeMap() {
@@ -810,8 +824,7 @@
 		    for (let i = 0; i < GexfJS.graph.edgeList.length; ++i) {
 			    GexfJS.graph.edge_index_by_importance[i] = i;
 			}
-		    GexfJS.graph.edge_index_by_importance.sort((a, b) => {
-			GexfJS.graph.edgeList[b].w - GexfJS.graph.edgeList[a].w });
+		    GexfJS.graph.edge_index_by_importance.sort((a, b) => GexfJS.graph.edgeList[b].w - GexfJS.graph.edgeList[a].w );
 		    
 		    var egourl_attr_index = GexfJS.graph.attributes.indexOf("egourl");
 		    if (egourl_attr_index >= 0) {
@@ -1577,16 +1590,20 @@
             GexfJS.proportionOfNodesToDraw = Math.max(0, GexfJS.proportionOfNodesToDraw - 0.01);
             $("#filterSlider").slider("value", GexfJS.proportionOfNodesToDraw);
 	    onStartMoving(); onEndMoving();
+	    $(this).attr("alt", "Showing up to " + parseInt((maxNodesToDraw()/GexfJS.graph.nodeList.length)*100) + "% (" + parseInt(maxNodesToDraw()) + ") of nodes" );
             return false;
-        })
-            .attr("title", "Show less");
+        }).mouseover(function () {
+	    $(this).attr("alt", "Showing up to " + parseInt((maxNodesToDraw()/GexfJS.graph.nodeList.length)*100) + "% (" + parseInt(maxNodesToDraw()) + ") of nodes" );
+	})
 	$("#filterPlusButton").click(function () {
             GexfJS.proportionOfNodesToDraw = Math.min(1.0, GexfJS.proportionOfNodesToDraw + 0.01);
-            $("#filterSlider").slider("value", GexfJS.proportionOfNodesToDraw);
+            $("#filterSlider").slider("value", GexfJS.proportionOfNodesToDraw); 
 	    onStartMoving(); onEndMoving();
+	    $(this).attr("alt", "Showing up to " + parseInt((maxNodesToDraw()/GexfJS.graph.nodeList.length)*100) + "% (" + parseInt(maxNodesToDraw()) + ") of nodes" );
             return false;
-        })
-            .attr("title", "Show more");
+        }).mouseover(function () {
+	    $(this).attr("alt", "Showing up to " + parseInt((maxNodesToDraw()/GexfJS.graph.nodeList.length)*100) + "% (" + parseInt(maxNodesToDraw()) + ") of nodes" );
+	})
 
         $(document).click(function (evt) {
             $("#autocomplete").slideUp();
@@ -1617,7 +1634,7 @@
                 _cG.animate({
                     "left": "0px"
                 }, function () {
-                    $("#aUnfold").attr("class", "leftarrow");
+                    $("#aUnfold").attr("class", "leftarrow tooltip").attr("alt", "Hide side panel");
                     $("#zonecentre").css({
                         left: _cG.width() + "px"
                     });
@@ -1626,7 +1643,7 @@
                 _cG.animate({
                     "left": "-" + _cG.width() + "px"
                 }, function () {
-                    $("#aUnfold").attr("class", "rightarrow");
+                    $("#aUnfold").attr("class", "rightarrow tooltip").attr("alt", "Expand side panel");
                     $("#zonecentre").css({
                         left: "0"
                     });

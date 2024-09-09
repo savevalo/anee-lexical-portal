@@ -1,18 +1,24 @@
 #!/bin/bash
+set -e
+set -x
 
-PACKAGEDIR=$1
-TARGET=$2
+# Configuration
+GEXF_BASE_DIR=$(pwd)
 
-mkdir -p $TARGET
-mv $PACKAGEDIR/*.gexf $TARGET/
-mv $PACKAGEDIR/*.json $TARGET/
-mv $PACKAGEDIR/egographs $TARGET/
-rmdir $PACKAGEDIR
+PACKAGEPATH=$(realpath $1)
+TARGETDIR=$(realpath $2)
+ORIG_DIR=$(pwd)
+PACKAGE_BASENAME=$(basename $PACKAGEPATH)
+INSTALLED_PATH=$TARGETDIR/$PACKAGE_BASENAME
 
-ln -s /var/www/gexf-js-base/config.js $TARGET
-ln -s /var/www/gexf-js-base/img $TARGET
-ln -s /var/www/gexf-js-base/index.html $TARGET
-ln -s /var/www/gexf-js-base/js $TARGET
-ln -s /var/www/gexf-js-base/styles $TARGET
-ln -s $(find $TARGET -maxdepth 1 -name "*.gexf" -maxdepth 1) $TARGET/index.gexf
-ln -s $(find $TARGET -maxdepth 1 -name "*.json" -maxdepth 1) $TARGET/index.json
+ln -s $GEXF_BASE_DIR/config.js $INSTALLED_PATH
+ln -s $GEXF_BASE_DIR/img $INSTALLED_PATH
+ln -s $GEXF_BASE_DIR/index.html $INSTALLED_PATH
+ln -s $GEXF_BASE_DIR/js $INSTALLED_PATH
+ln -s $GEXF_BASE_DIR/styles $INSTALLED_PATH
+
+cd $INSTALLED_PATH
+ln -s $(find . -maxdepth 1 -name "*.gexf") index.gexf
+ln -s $(find . -maxdepth 1 -name "*.json") index.json
+
+cd $ORIG_DIR

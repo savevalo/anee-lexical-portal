@@ -15,8 +15,8 @@ ln -sf $GEXF_BASE_DIR/js $PACKAGEPATH/js
 ln -sf $GEXF_BASE_DIR/styles $PACKAGEPATH/styles
 
 cd $PACKAGEPATH
-rm index.gexf
-rm index.json
+rm -f index.gexf
+rm -f index.json
 ln -sf $(find . -maxdepth 1 -name "*.gexf") index.gexf
 ln -sf $(find . -maxdepth 1 -name "*.json") index.json
 

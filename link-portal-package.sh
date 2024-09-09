@@ -8,11 +8,11 @@ GEXF_BASE_DIR=$(realpath $(pwd))
 PACKAGEPATH=$(realpath $1)
 ORIG_DIR=$(pwd)
 
-ln -sf $GEXF_BASE_DIR/config.js $PACKAGEPATH
-ln -sf $GEXF_BASE_DIR/img $PACKAGEPATH
-ln -sf $GEXF_BASE_DIR/index.html $PACKAGEPATH
-ln -sf $GEXF_BASE_DIR/js $PACKAGEPATH
-ln -sf $GEXF_BASE_DIR/styles $PACKAGEPATH
+ln -sf $GEXF_BASE_DIR/config.js $PACKAGEPATH/config.js
+ln -sf $GEXF_BASE_DIR/img $PACKAGEPATH/img
+ln -sf $GEXF_BASE_DIR/index.html $PACKAGEPATH/index.html
+ln -sf $GEXF_BASE_DIR/js $PACKAGEPATH/js
+ln -sf $GEXF_BASE_DIR/styles $PACKAGEPATH/styles
 
 cd $PACKAGEPATH
 rm index.gexf

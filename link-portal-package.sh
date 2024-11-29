@@ -5,6 +5,10 @@ set -x
 # Configuration
 GEXF_BASE_DIR=$(realpath $(pwd))
 
+if [ "$#" -ge 2 ]; then
+    GEXF_BASE_DIR=$(realpath $2)
+fi
+
 PACKAGEPATH=$(realpath $1)
 ORIG_DIR=$(pwd)
 

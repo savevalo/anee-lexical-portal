@@ -392,6 +392,7 @@
                 var _li = $("<li>");
                 var attrkey = GexfJS.graph.attributes[attr[0]];
 		if (attrkey != 'image' && strLang(attrkey) != 'freqrank' && GexfJS.params.replaceUrls && isURL(attr[1])) {
+		    if (attrkey == 'egourl') { continue; }
 		    _b = $("<b>")
 		    _b.append(replaceURLWithHyperlinks(attr[1], strLang(attrkey)));
 		    _b.appendTo(_li);

@@ -265,9 +265,7 @@
     
     function replaceURLWithHyperlinks(text, linktext) {
         if (GexfJS.params.replaceUrls) {
-	    if (linktext == "egourl") {
-		linktext = "Go to this word's ego graph";
-	    } else if (linktext == "search url" || linktext == "korp url") {
+	    if (linktext == "search url" || linktext == "korp url") {
 		linktext = "Search in Korp";
 	    }
 
@@ -816,7 +814,7 @@
 			GexfJS.graph.index_by_importance.sort((a, b) => 
 			    GexfJS.graph.nodeList[b]["a"][importance_index][1] - GexfJS.graph.nodeList[a]["a"][importance_index][1] );
 		    }
-		    // Center view on most important node (this is overridden later if it's an ego graph)
+		    // Center view on most important node
 		    GexfJS.params.centreX = GexfJS.graph.nodeList[GexfJS.graph.index_by_importance[0]].x;
                     GexfJS.params.centreY = GexfJS.graph.nodeList[GexfJS.graph.index_by_importance[0]].y;;
 		    
@@ -825,20 +823,6 @@
 			    GexfJS.graph.edge_index_by_importance[i] = i;
 			}
 		    GexfJS.graph.edge_index_by_importance.sort((a, b) => GexfJS.graph.edgeList[b].w - GexfJS.graph.edgeList[a].w );
-		    
-		    var egourl_attr_index = GexfJS.graph.attributes.indexOf("egourl");
-		    if (egourl_attr_index >= 0) {
-			console.log("Found egourl attribute");
-			for (let i = 0; i < GexfJS.graph.nodeList.length; ++i) {
-			    if (GexfJS.graph.nodeList[i]["a"].length <= egourl_attr_index || GexfJS.graph.nodeList[i]["a"][egourl_attr_index][0] != egourl_attr_index || GexfJS.graph.nodeList[i]["a"][egourl_attr_index][1] == "") {
-				console.log("Found egourl root");
-				GexfJS.graph.root_node = i;
-				//GexfJS.params.activeNode = i;
-				//GexfJS.params.currentNode = i;
-				break;
-			    }
-			}
-		    }
                 } else {
                     var _g = $(data).find("graph"),
                         _nodes = _g.children().filter("nodes").children(),

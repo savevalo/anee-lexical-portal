@@ -321,6 +321,7 @@
 	}
 
         GexfJS.params.currentNode = _nodeIndex;
+	GexfJS.params.activeNode = -1;
         if (_nodeIndex != -1) {
             var _d = GexfJS.graph.nodeList[_nodeIndex],
                 _html = $('<div>'),

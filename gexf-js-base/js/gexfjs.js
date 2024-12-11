@@ -494,9 +494,9 @@
                 GexfJS.params.centreX = _d.x;
                 GexfJS.params.centreY = _d.y;
             }
-            $("#searchinput")
-                .val(_d.l)
-                .removeClass('grey');
+            // $("#searchinput")
+            //     .val(_d.l)
+            //     .removeClass('grey');
         }
     }
 

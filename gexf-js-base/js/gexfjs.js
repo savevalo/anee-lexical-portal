@@ -1163,8 +1163,9 @@
         if (_centralNode != -1) {
             _tagsMisEnValeur = [_centralNode];
         }
-
+	console.log("Trying to enter arc drawing")M
         if (!GexfJS.params.isMoving && (GexfJS.params.showEdges || _centralNode != -1)) {
+	    console.log("Entered arc drawing, _centralNode is " + _centralNode);
 	    var maxLineWidth = 0.001;
             var _showAllEdges = (GexfJS.params.showEdges && GexfJS.params.currentNode == -1);
 
@@ -1211,15 +1212,17 @@
                         _coulTag = _dt.B;
                         _isLinked = true;
                         _dt.visible = true;
+			console.log("Setting visible " + _six + " " + _tix);
                     }
                     if (_tix == _centralNode) {
                         _tagsMisEnValeur.push(_six);
                         _coulTag = _ds.B;
                         _isLinked = true;
                         _ds.visible = true;
+			console.log("Setting visible " + _six + " " + _tix);
                     }
                 }
-
+		
                 if ((_isLinked || _showAllEdges) && (_ds.withinFrame || _dt.withinFrame) && _ds.visible && _dt.visible && (!_ds.filtered && !_dt.filtered)) {
                     var _coords = ((GexfJS.params.useLens && GexfJS.mousePosition) ? calcCoord(GexfJS.mousePosition.x, GexfJS.mousePosition.y, _ds.actual_coords) : _ds.actual_coords);
                     _coordt = ((GexfJS.params.useLens && GexfJS.mousePosition) ? calcCoord(GexfJS.mousePosition.x, GexfJS.mousePosition.y, _dt.actual_coords) : _dt.actual_coords);

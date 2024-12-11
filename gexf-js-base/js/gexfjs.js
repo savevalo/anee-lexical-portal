@@ -1040,6 +1040,7 @@
     }
     
     function traceArc(ctx, source, target, arrow_size, draw_arrow) {
+	console.log("Calling traceArc with " + arrow_size + " " + GexfJS.ctxGraphe.lineWidth)
         ctx.beginPath();
         ctx.moveTo(source.x, source.y);
         if (GexfJS.params.curvedEdges) {
@@ -1229,6 +1230,7 @@
 		    var _dist = Math.sqrt(Math.pow(_coords.x - _coordt.x, 2) + Math.pow(_coords.y - _coordt.y, 2));
                     GexfJS.ctxGraphe.strokeStyle = (_isLinked ? _d.C : "rgba(100,100,100,0.2)");
 		    if (maxLineWidth <= 30.0) {
+			console.log("Setting lineWidth, vals are " + maxLineWidth + " " + min_node_radius * .8 + " " + _dist*.5 + " " + _edgeSizeFactor * _d.W);
 			GexfJS.ctxGraphe.lineWidth = Math.min(maxLineWidth, min_node_radius*.8, _dist*.5, _edgeSizeFactor * _d.W);
 		    } else {
 			GexfJS.ctxGraphe.lineWidth = 30*((min_node_radius*.8, _dist*.5, _edgeSizeFactor * _d.W)/maxLineWidth);

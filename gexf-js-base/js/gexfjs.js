@@ -1163,7 +1163,7 @@
         if (_centralNode != -1) {
             _tagsMisEnValeur = [_centralNode];
         }
-	console.log("Trying to enter arc drawing")M
+	console.log("Trying to enter arc drawing");
         if (!GexfJS.params.isMoving && (GexfJS.params.showEdges || _centralNode != -1)) {
 	    console.log("Entered arc drawing, _centralNode is " + _centralNode);
 	    var maxLineWidth = 0.001;

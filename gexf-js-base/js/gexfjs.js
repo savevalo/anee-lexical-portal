@@ -1223,7 +1223,7 @@
                     }
                 }
 		
-                if ((_isLinked || _showAllEdges) && (_ds.withinFrame || _dt.withinFrame) && _ds.visible && _dt.visible && (!_ds.filtered && !_dt.filtered)) {
+                if ((_isLinked || _showAllEdges) && (_ds.withinFrame || _dt.withinFrame) && _ds.visible && _dt.visible && (_centralNode != -1 || (!_ds.filtered && !_dt.filtered))) {
                     var _coords = ((GexfJS.params.useLens && GexfJS.mousePosition) ? calcCoord(GexfJS.mousePosition.x, GexfJS.mousePosition.y, _ds.actual_coords) : _ds.actual_coords);
                     _coordt = ((GexfJS.params.useLens && GexfJS.mousePosition) ? calcCoord(GexfJS.mousePosition.x, GexfJS.mousePosition.y, _dt.actual_coords) : _dt.actual_coords);
 		    var _dist = Math.sqrt(Math.pow(_coords.x - _coordt.x, 2) + Math.pow(_coords.y - _coordt.y, 2));

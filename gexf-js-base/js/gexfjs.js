@@ -321,7 +321,6 @@
 	}
 
         GexfJS.params.currentNode = _nodeIndex;
-	GexfJS.params.activeNode = -1;
         if (_nodeIndex != -1) {
             var _d = GexfJS.graph.nodeList[_nodeIndex],
                 _html = $('<div>'),
@@ -1040,7 +1039,7 @@
     }
     
     function traceArc(ctx, source, target, arrow_size, draw_arrow) {
-	console.log("Calling traceArc with " + arrow_size + " " + GexfJS.ctxGraphe.lineWidth)
+//	console.log("Calling traceArc with " + arrow_size + " " + GexfJS.ctxGraphe.lineWidth)
         ctx.beginPath();
         ctx.moveTo(source.x, source.y);
         if (GexfJS.params.curvedEdges) {
@@ -1123,7 +1122,6 @@
 
         var _centralNode = ((GexfJS.params.activeNode != -1) ? GexfJS.params.activeNode : GexfJS.params.currentNode);
 
-	var min_node_radius = 1000.0;
 	var nodes_visible = 0;
         for (let i = 0; i < GexfJS.graph.index_by_importance.length; ++i) {
             var _d = GexfJS.graph.nodeList[GexfJS.graph.index_by_importance[i]];
@@ -1149,8 +1147,7 @@
 		}
 	    }
 	    _d.filtered = (GexfJS.params.colorFilter != null && _d.B !== GexfJS.params.colorFilter) || filtered_by_textfilter;
-	    if (_d.withinFrame) {
-		min_node_radius = Math.min(min_node_radius, _d.actual_coords.r);
+	    if (_d.withinFrame && !_d.filtered) {
 		    // No node selected, showing everything
 		_d.visible = (GexfJS.params.currentNode == -1 && nodes_visible < maxNodesToDraw()) || i == _centralNode;
 		nodes_visible += _d.visible && !_d.filtered ? 1: 0;
@@ -1164,13 +1161,17 @@
         if (_centralNode != -1) {
             _tagsMisEnValeur = [_centralNode];
         }
-	console.log("Trying to enter arc drawing");
         if (!GexfJS.params.isMoving && (GexfJS.params.showEdges || _centralNode != -1)) {
-	    console.log("Entered arc drawing, _centralNode is " + _centralNode);
+	    var min_node_radius = 1000.0;
+	    if (_centralNode != -1) {
+		min_node_radius = GexfJS.graph.nodeList[_centralNode].actual_coords.r;
+	    }
 	    var maxLineWidth = 0.001;
             var _showAllEdges = (GexfJS.params.showEdges && GexfJS.params.currentNode == -1);
 
             for (var i in GexfJS.graph.edgeList) {
+		// First pass over the edges to collect max line width and
+		// min node radius information
                 var _d = GexfJS.graph.edgeList[i],
                     _six = _d.s,
                     _tix = _d.t,
@@ -1183,14 +1184,19 @@
                         _coulTag = _dt.B;
                         _isLinked = true;
                         _dt.visible = true;
+			min_node_radius = Math.min(min_node_radius, _dt.actual_coords.r);
                     }
                     if (_tix == _centralNode) {
                         _tagsMisEnValeur.push(_six);
                         _coulTag = _ds.B;
                         _isLinked = true;
                         _ds.visible = true;
+			min_node_radius = Math.min(min_node_radius, _ds.actual_coords.r);
                     }
-                }
+                } else {
+		    if (_ds.withinFrame && _ds.visible) { min_node_radius = Math.min(min_node_radius, _ds.actual_coords.r); }
+		    if (_dt.withinFrame && _dt.visible) { min_node_radius = Math.min(min_node_radius, _dt.actual_coords.r); }
+		}
 
                 if ((_isLinked || _showAllEdges) && (_ds.withinFrame || _dt.withinFrame) && _ds.visible && _dt.visible) {
                     var _coords = ((GexfJS.params.useLens && GexfJS.mousePosition) ? calcCoord(GexfJS.mousePosition.x, GexfJS.mousePosition.y, _ds.actual_coords) : _ds.actual_coords);
@@ -1199,7 +1205,8 @@
 		    maxLineWidth = Math.max(maxLineWidth, _edgeSizeFactor * _d.W);
                 }
             }
-
+	    // If the lines are much thicker than the node radii, we might want to scale them down
+	    var line_width_scaling_factor = Math.min(1.0, (min_node_radius*1.8) / maxLineWidth);
             for (let i = 0; i < GexfJS.graph.edge_index_by_importance.length; ++i) {
                 var _d = GexfJS.graph.edgeList[GexfJS.graph.edge_index_by_importance[i]],
                     _six = _d.s,
@@ -1213,14 +1220,12 @@
                         _coulTag = _dt.B;
                         _isLinked = true;
                         _dt.visible = true;
-			console.log("Setting visible " + _six + " " + _tix);
                     }
                     if (_tix == _centralNode) {
                         _tagsMisEnValeur.push(_six);
                         _coulTag = _ds.B;
                         _isLinked = true;
                         _ds.visible = true;
-			console.log("Setting visible " + _six + " " + _tix);
                     }
                 }
 		
@@ -1229,12 +1234,8 @@
                     _coordt = ((GexfJS.params.useLens && GexfJS.mousePosition) ? calcCoord(GexfJS.mousePosition.x, GexfJS.mousePosition.y, _dt.actual_coords) : _dt.actual_coords);
 		    var _dist = Math.sqrt(Math.pow(_coords.x - _coordt.x, 2) + Math.pow(_coords.y - _coordt.y, 2));
                     GexfJS.ctxGraphe.strokeStyle = (_isLinked ? _d.C : "rgba(100,100,100,0.2)");
-		    if (maxLineWidth <= 30.0) {
-			console.log("Setting lineWidth, vals are " + maxLineWidth + " " + min_node_radius * .8 + " " + _dist*.5 + " " + _edgeSizeFactor * _d.W);
-			GexfJS.ctxGraphe.lineWidth = Math.min(maxLineWidth, min_node_radius*.8, _dist*.5, _edgeSizeFactor * _d.W);
-		    } else {
-			GexfJS.ctxGraphe.lineWidth = 30*((min_node_radius*.8, _dist*.5, _edgeSizeFactor * _d.W)/maxLineWidth);
-		    }
+		    GexfJS.ctxGraphe.lineWidth = Math.max(1.0, line_width_scaling_factor * _edgeSizeFactor * _d.W);
+		    // console.log("Setting lineWidth to " + GexfJS.ctxGraphe.lineWidth + ", vals are " + maxLineWidth + " " + line_width_scaling_factor);
                     traceArc(GexfJS.ctxGraphe, _coords, _coordt, _sizeFactor * 3.5, GexfJS.params.showEdgeArrow && _d.d);
                 }
             }

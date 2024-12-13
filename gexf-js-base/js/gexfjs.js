@@ -787,11 +787,12 @@
 
 		    if (!GexfJS.graph.hasOwnProperty("name")) { GexfJS.graph.name = url; }
 		    document.getElementsByName("graphname")[0].innerHTML = GexfJS.graph.name;
-		    if (GexfJS.graph.name.includes("PMI")) {
-			document.getElementById("mainPageLink").setAttribute("href", "http://urn.fi/urn:nbn:fi:lb-2021060102");
-		    } else if (GexfJS.graph.name.includes("fastText")) {
-			document.getElementById("mainPageLink").setAttribute("href", "http://urn.fi/urn:nbn:fi:lb-2021060104");
-		    }
+		    document.getElementById("mainPageLink").setAttribute("href", "https://urn.fi/urn:nbn:fi:lb-2024121101");
+		    // if (GexfJS.graph.name.includes("PMI")) {
+		    // 	document.getElementById("mainPageLink").setAttribute("href", "http://urn.fi/urn:nbn:fi:lb-2021060102");
+		    // } else if (GexfJS.graph.name.includes("fastText")) {
+		    // 	document.getElementById("mainPageLink").setAttribute("href", "http://urn.fi/urn:nbn:fi:lb-2021060104");
+		    // }
                     GexfJS.graph.indexOfLabels = GexfJS.graph.nodeList.map(function (_d) {
                         return normalizeText.normalizeText(_d.l);
                     });

@@ -45,6 +45,7 @@
         autoCompletePosition: 0,
 	nodeHistory: [],
 	nodeHistoryPosition: -1,
+	nodeRadiusUpperLimit: 80,
         i18n: {
             "az": {
                 "search": "Təpələri axtar",
@@ -960,13 +961,12 @@
     }
 
     function getNodeFromPos(_coords) {
-	let node_radius_upper_limit = 80;
         for (var i = GexfJS.graph.nodeList.length - 1; i >= 0; i--) {
             var _d = GexfJS.graph.nodeList[i];
-            if (_d.visible && _d.withinFrame && !_d.filtered) {
+            if (_d.visible) {
                 var _c = _d.actual_coords;
                 _r = Math.sqrt(Math.pow(_c.x - _coords.x, 2) + Math.pow(_c.y - _coords.y, 2));
-                if (_r < Math.min(_c.r, node_radius_upper_limit)) {
+                if (_r < Math.min(_c.r,	GexfJS.nodeRadiusUpperLimit)) {
                     return i;
                 }
             }
@@ -1149,9 +1149,8 @@
 	    }
 	    _d.filtered = (GexfJS.params.colorFilter != null && _d.B !== GexfJS.params.colorFilter) || filtered_by_textfilter;
 	    if (_d.withinFrame && !_d.filtered) {
-		    // No node selected, showing everything
 		_d.visible = (GexfJS.params.currentNode == -1 && nodes_visible < maxNodesToDraw()) || i == _centralNode;
-		nodes_visible += _d.visible && !_d.filtered ? 1: 0;
+		nodes_visible += _d.visible ? 1: 0;
 	    } else {
 		_d.visible = i == _centralNode;
 	    }
@@ -1163,7 +1162,7 @@
             _tagsMisEnValeur = [_centralNode];
         }
         if (!GexfJS.params.isMoving && (GexfJS.params.showEdges || _centralNode != -1)) {
-	    var min_node_radius = 1000.0;
+	    var min_node_radius = GexfJS.nodeRadiusUpperLimit;
 	    if (_centralNode != -1) {
 		min_node_radius = GexfJS.graph.nodeList[_centralNode].actual_coords.r;
 	    }
@@ -1178,31 +1177,23 @@
                     _tix = _d.t,
                     _ds = GexfJS.graph.nodeList[_six],
                     _dt = GexfJS.graph.nodeList[_tix];
-                var _isLinked = false;
+                var _isCentrallyLinked = false;
                 if (_centralNode != -1) {
                     if (_six == _centralNode) {
                         _tagsMisEnValeur.push(_tix);
-                        _coulTag = _dt.B;
-                        _isLinked = true;
-                        _dt.visible = true;
-			min_node_radius = Math.min(min_node_radius, _dt.actual_coords.r);
+                        _isCentrallyLinked = true;
+			_dt.visible = true;
                     }
                     if (_tix == _centralNode) {
                         _tagsMisEnValeur.push(_six);
-                        _coulTag = _ds.B;
-                        _isLinked = true;
-                        _ds.visible = true;
-			min_node_radius = Math.min(min_node_radius, _ds.actual_coords.r);
+                        _isCentrallyLinked = true;
+			_ds.visible = true;
                     }
-                } else {
-		    if (_ds.withinFrame && _ds.visible) { min_node_radius = Math.min(min_node_radius, _ds.actual_coords.r); }
-		    if (_dt.withinFrame && _dt.visible) { min_node_radius = Math.min(min_node_radius, _dt.actual_coords.r); }
-		}
+                }
+		if (_ds.visible) { min_node_radius = Math.min(min_node_radius, _ds.actual_coords.r); }
+		if (_dt.visible) { min_node_radius = Math.min(min_node_radius, _dt.actual_coords.r); }
 
-                if ((_isLinked || _showAllEdges) && (_ds.withinFrame || _dt.withinFrame) && _ds.visible && _dt.visible) {
-                    var _coords = ((GexfJS.params.useLens && GexfJS.mousePosition) ? calcCoord(GexfJS.mousePosition.x, GexfJS.mousePosition.y, _ds.actual_coords) : _ds.actual_coords);
-                    _coordt = ((GexfJS.params.useLens && GexfJS.mousePosition) ? calcCoord(GexfJS.mousePosition.x, GexfJS.mousePosition.y, _dt.actual_coords) : _dt.actual_coords);
-		    var _dist = Math.sqrt(Math.pow(_coords.x - _coordt.x, 2) + Math.pow(_coords.y - _coordt.y, 2));
+                if (_isCentrallyLinked || (_showAllEdges && (_ds.withinFrame || _dt.withinFrame) && (!_ds.filtered && !_dt.filtered))) {
 		    maxLineWidth = Math.max(maxLineWidth, _edgeSizeFactor * _d.W);
                 }
             }
@@ -1214,28 +1205,26 @@
                     _tix = _d.t,
                     _ds = GexfJS.graph.nodeList[_six],
                     _dt = GexfJS.graph.nodeList[_tix];
-                var _isLinked = false;
+                var _isCentrallyLinked = false;
                 if (_centralNode != -1) {
                     if (_six == _centralNode) {
                         _tagsMisEnValeur.push(_tix);
-                        _coulTag = _dt.B;
-                        _isLinked = true;
+                        _isCentrallyLinked = true;
                         _dt.visible = true;
                     }
                     if (_tix == _centralNode) {
                         _tagsMisEnValeur.push(_six);
-                        _coulTag = _ds.B;
-                        _isLinked = true;
+                        _isCentrallyLinked = true;
                         _ds.visible = true;
                     }
                 }
 		
-                if (_isLinked || (_showAllEdges && (_ds.withinFrame || _dt.withinFrame) && _ds.visible && _dt.visible && (!_ds.filtered && !_dt.filtered))) {
+                if (_isCentrallyLinked || (_showAllEdges && (_ds.withinFrame || _dt.withinFrame) && (!_ds.filtered && !_dt.filtered))) {
                     var _coords = ((GexfJS.params.useLens && GexfJS.mousePosition) ? calcCoord(GexfJS.mousePosition.x, GexfJS.mousePosition.y, _ds.actual_coords) : _ds.actual_coords);
                     _coordt = ((GexfJS.params.useLens && GexfJS.mousePosition) ? calcCoord(GexfJS.mousePosition.x, GexfJS.mousePosition.y, _dt.actual_coords) : _dt.actual_coords);
 		    var _dist = Math.sqrt(Math.pow(_coords.x - _coordt.x, 2) + Math.pow(_coords.y - _coordt.y, 2));
-                    GexfJS.ctxGraphe.strokeStyle = (_isLinked ? _d.C : "rgba(100,100,100,0.2)");
-		    GexfJS.ctxGraphe.lineWidth = Math.max(1.0, line_width_scaling_factor * _edgeSizeFactor * _d.W);
+                    GexfJS.ctxGraphe.strokeStyle = (_centralNode != -1 && !_isCentrallyLinked ? "rgba(100,100,100,0.2)": _d.C);
+		    GexfJS.ctxGraphe.lineWidth = Math.max(1.0, Math.min(line_width_scaling_factor * _edgeSizeFactor * _d.W, GexfJS.nodeRadiusUpperLimit * 1.8));
 		    // console.log("Setting lineWidth to " + GexfJS.ctxGraphe.lineWidth + ", vals are " + maxLineWidth + " " + line_width_scaling_factor);
                     traceArc(GexfJS.ctxGraphe, _coords, _coordt, _sizeFactor * 3.5, GexfJS.params.showEdgeArrow && _d.d);
                 }
@@ -1256,7 +1245,6 @@
 	    }
         }
 
-	let node_radius_upper_limit = 60;
         for (var i in GexfJS.graph.nodeList) {
             var _d = GexfJS.graph.nodeList[i];
             if (_d.visible && _d.withinFrame && !_d.filtered) {
@@ -1265,7 +1253,7 @@
                     _d.isTag = (_tagsMisEnValeur.indexOf(parseInt(i)) != -1);
                     GexfJS.ctxGraphe.beginPath();
                     GexfJS.ctxGraphe.fillStyle = ((_tagsMisEnValeur.length && !_d.isTag) ? _d.G : _d.B);
-                    GexfJS.ctxGraphe.arc(_d.real_coords.x, _d.real_coords.y, Math.min(_d.real_coords.r, node_radius_upper_limit), 0, Math.PI * 2, true);
+                    GexfJS.ctxGraphe.arc(_d.real_coords.x, _d.real_coords.y, Math.min(_d.real_coords.r, GexfJS.nodeRadiusUpperLimit), 0, Math.PI * 2, true);
                     GexfJS.ctxGraphe.closePath();
                     GexfJS.ctxGraphe.fill();
                 }
@@ -1304,7 +1292,7 @@
         if (_centralNode != -1 && _dnc) {
             GexfJS.ctxGraphe.fillStyle = _dnc.B;
             GexfJS.ctxGraphe.beginPath();
-            GexfJS.ctxGraphe.arc(_dnc.real_coords.x, _dnc.real_coords.y, Math.min(_dnc.real_coords.r, node_radius_upper_limit*1.2), 0, Math.PI * 2, true);
+            GexfJS.ctxGraphe.arc(_dnc.real_coords.x, _dnc.real_coords.y, Math.min(_dnc.real_coords.r, GexfJS.nodeRadiusUpperLimit*1.2), 0, Math.PI * 2, true);
             GexfJS.ctxGraphe.closePath();
             GexfJS.ctxGraphe.fill();
             GexfJS.ctxGraphe.stroke();

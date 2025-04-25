@@ -788,7 +788,7 @@
 
 		    if (!GexfJS.graph.hasOwnProperty("name")) { GexfJS.graph.name = url; }
 		    document.getElementsByName("graphname")[0].innerHTML = GexfJS.graph.name;
-		    document.getElementsByName("graphname")[0].setAttribute("href", "index.html");
+		    //document.getElementsByName("graphname")[0].setAttribute("href", "index.html");
 		    document.getElementById("mainPageLink").setAttribute("href", "https://urn.fi/urn:nbn:fi:lb-2024121101");
 		    // if (GexfJS.graph.name.includes("PMI")) {
 		    // 	document.getElementById("mainPageLink").setAttribute("href", "http://urn.fi/urn:nbn:fi:lb-2021060102");

@@ -1382,15 +1382,15 @@
 		$('<li>')
 		    .attr("id", "liac_" + _n)
 		    .append($('<a>')
-			    .mouseover(function () {
-				changePosAC(closure_n);
-			    })
-			    .click(function () {
-				displayNode(ac_data[0], true);
-				return false;
-			    })
 			    .text(GexfJS.graph.nodeList[ac_data[0]].l)
 			   )
+		    .mouseover(function () {
+			changePosAC(closure_n);
+		    })
+		    .click(function () {
+			displayNode(ac_data[0], true);
+			return false;
+		    })
 		    .appendTo(_acContent);
 		_n++;
 	    });
@@ -1401,15 +1401,15 @@
 			$('<li>')
                             .attr("id", "liac_" + _n)
                             .append($('<a>')
-				    .mouseover(function () {
-					changePosTransAC(closure_n);
-				    })
-				    .click(function () {
-					displayNode(i, true);
-					return false;
-				    })
 				    .text(GexfJS.graph.nodeList[i].l)
 				   )
+			    .mouseover(function () {
+				changePosTransAC(closure_n);
+			    })
+			    .click(function () {
+				displayNode(i, true);
+				return false;
+			    })
                             .appendTo(_acTranslationContent);
 			_n++;
                     }

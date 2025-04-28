@@ -796,6 +796,9 @@
 		    // 	document.getElementById("mainPageLink").setAttribute("href", "http://urn.fi/urn:nbn:fi:lb-2021060104");
 		    // }
                     GexfJS.graph.indexOfLabels = GexfJS.graph.nodeList.map(function (_d) {
+                        return _d.l;
+                    });
+                    GexfJS.graph.indexOfNormalizedLabels = GexfJS.graph.nodeList.map(function (_d) {
                         return normalizeText.normalizeText(_d.l);
                     });
 		    var translation_attr_index = GexfJS.graph.attributes.indexOf("translation");
@@ -835,6 +838,7 @@
                         directed: (_g.attr("defaultedgetype") == "directed"),
                         nodeList: [],
                         indexOfLabels: [],
+                        indexOfNormalizedLabels: [],
                         edgeList: [],
                         attributes: {},
                     };
@@ -892,7 +896,8 @@
                         }
                         GexfJS.graph.nodeList.push(_d);
                         nodeIndexById.push(_d.id);
-                        GexfJS.graph.indexOfLabels.push(normalizeText.normalizeText(_d.l));
+			GexfJS.graph.indexOfLabels.push(_d.l);
+                        GexfJS.graph.indexOfNormalizedLabels.push(normalizeText.normalizeText(_d.l));
                     });
 
                     $(_edges).each(function () {
@@ -1332,7 +1337,7 @@
     function hoverAC() {
         $("#autocomplete li").removeClass("hover");
         $("#liac_" + GexfJS.autoCompletePosition).addClass("hover");
-        GexfJS.params.activeNode = GexfJS.graph.indexOfLabels.indexOf(normalizeText.normalizeText($("#liac_" + GexfJS.autoCompletePosition).text()));
+        GexfJS.params.activeNode = GexfJS.graph.indexOfLabels.indexOf($("#liac_" + GexfJS.autoCompletePosition).text());
     }
 
     function hoverTransAC() {
@@ -1360,7 +1365,7 @@
             GexfJS.lastAC = _val;
             var _n = 0;
 	    var ac_content_array = []
-	    GexfJS.graph.indexOfLabels.forEach(function (_l, i) {
+	    GexfJS.graph.indexOfNormalizedLabels.forEach(function (_l, i) {
 		var pos = _l.indexOf(_val);
 		if (pos != -1) {
 		    ac_content_array.push([i, _l.length, pos])
@@ -1528,7 +1533,7 @@
             });
         $("#recherche").submit(function () {
             if (GexfJS.graph) {
-                displayNode(GexfJS.graph.indexOfLabels.indexOf(normalizeText.normalizeText($("#searchinput").val())), true);
+                displayNode(GexfJS.graph.indexOfNormalizedLabels.indexOf(normalizeText.normalizeText($("#searchinput").val())), true);
             }
             return false;
         });

@@ -1392,7 +1392,9 @@
 			return false;
 		    })
 		    .appendTo(_acContent);
+		console.log("Added _acContent item with id liac_" + _n + " and label " + GexfJS.graph.nodeList[ac_data[0]].l + " and number " + ac_data[0]);
 		_n++;
+
 	    });
 	    if (typeof(GexfJS.graph.indexOfTranslations) != 'undefined') {
 		GexfJS.graph.indexOfTranslations.forEach(function (_l, i) {

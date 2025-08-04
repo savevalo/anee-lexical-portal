@@ -790,11 +790,9 @@
 		    document.getElementsByName("graphname")[0].innerHTML = GexfJS.graph.name;
 		    //document.getElementsByName("graphname")[0].setAttribute("href", "index.html");
 		    document.getElementById("mainPageLink").setAttribute("href", "https://urn.fi/urn:nbn:fi:lb-2024121101");
-		    // if (GexfJS.graph.name.includes("PMI")) {
-		    // 	document.getElementById("mainPageLink").setAttribute("href", "http://urn.fi/urn:nbn:fi:lb-2021060102");
-		    // } else if (GexfJS.graph.name.includes("fastText")) {
-		    // 	document.getElementById("mainPageLink").setAttribute("href", "http://urn.fi/urn:nbn:fi:lb-2021060104");
-		    // }
+		    if (GexfJS.graph.name.includes("Neo-Babylonian corpus")) {
+		     	document.getElementById("mainPageLink").setAttribute("href", "https://urn.fi/urn:nbn:fi:lb-2025052001");
+		    }
                     GexfJS.graph.indexOfLabels = GexfJS.graph.nodeList.map(function (_d) {
                         return _d.l;
                     });

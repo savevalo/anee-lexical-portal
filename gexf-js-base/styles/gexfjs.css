@@ -94,6 +94,7 @@ h1 a {
 
 #carte {
     position: absolute; left: 0px;
+    background-color: black;
 }
 
 /* ZOOM IN OUT */
